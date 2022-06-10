@@ -27,7 +27,7 @@ export default class CountryDAO implements CountryRepository, CrudRepository<Cou
         })
     }
 
-    openByName(nameValue: string): Promise<Country> {
+    openByName(nameValue: string): Promise<Country | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(COUNTRY_NAME_OBJECT, { name: nameValue }).then(value => {
                 resolve(value != null ? Object.assign(new Country(), value) : null)
@@ -65,7 +65,7 @@ export default class CountryDAO implements CountryRepository, CrudRepository<Cou
         })
     }
 
-    open(idOpen: string): Promise<Country> {
+    open(idOpen: string): Promise<Country | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(COUNTRY_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new Country(), value) : null)

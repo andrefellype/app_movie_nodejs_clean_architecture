@@ -11,8 +11,8 @@ import MovieController from './MovieController'
 class ActorController {
     private static async deleteActor(idsActor: string[], actorDAO: ActorDAO) {
         await actorDAO.getAllByIds(idsActor).then(async valueJson => {
-            const idsDelete = []
-            const idsUpdate = []
+            const idsDelete: object[] = []
+            const idsUpdate: object[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 if (!valueJson[v].reviewed) {
                     idsDelete.push((new ObjectId(valueJson[v]._id)))
@@ -87,7 +87,7 @@ class ActorController {
             } else {
                 const actorDAO = new ActorDAO()
                 actorDAO.open(req.body.actorId).then(async valueJson => {
-                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, ActorGetObjectForJson(valueJson)))
+                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, ActorGetObjectForJson(valueJson!!)))
                 }).catch(err => console.log(err))
             }
         })

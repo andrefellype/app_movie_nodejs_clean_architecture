@@ -48,7 +48,7 @@ class UserController {
             } else {
                 const userDAO = new UserDAO()
                 userDAO.open(req.body.userId).then(valueUser => {
-                    userDAO.updateByWhere({ enabled: !valueUser.enabled, "updated_at": ConvertData.getDateNowStr() }, { _id: new ObjectId(req.body.userId) })
+                    userDAO.updateByWhere({ enabled: !valueUser!!.enabled, "updated_at": ConvertData.getDateNowStr() }, { _id: new ObjectId(req.body.userId) })
                         .then(valueUpdate => {
                             DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                         }).catch(err => console.log(err))
@@ -84,7 +84,7 @@ class UserController {
             } else {
                 const userDAO = new UserDAO()
                 userDAO.open(req.body.userId).then(async valueUser => {
-                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, UserGetObjectForJson(valueUser)))
+                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, UserGetObjectForJson(valueUser!!)))
                 }).catch(err => console.log(err))
             }
         })
@@ -126,7 +126,7 @@ class UserController {
                 }, { _id: new ObjectId(req.userAuth._id) }).then(async valueUpdate => {
                     userDAO.open(req.userAuth._id).then((value) => {
                         const token = jwt.sign({ userAuth: value }, "appmovie", { expiresIn: 43200 })
-                        const userData = UserGetObjectForJson(value, token)
+                        const userData = UserGetObjectForJson(value!!, token)
                         req.session.user = userData
                         DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, userData))
                     })
@@ -152,7 +152,7 @@ class UserController {
                     }, { _id: new ObjectId(req.userAuth._id) }).then(async valueUpdate => {
                         userDAO.open(req.userAuth._id).then((value) => {
                             const token = jwt.sign({ userAuth: value }, "appmovie", { expiresIn: 43200 })
-                            const userData = UserGetObjectForJson(value, token)
+                            const userData = UserGetObjectForJson(value!!, token)
                             req.session.user = userData
                             DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, userData))
                         })
@@ -171,7 +171,7 @@ class UserController {
             } else {
                 const userDAO = new UserDAO()
                 userDAO.open(req.userAuth._id).then(async valueUser => {
-                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, UserGetObjectForJson(valueUser)))
+                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, UserGetObjectForJson(valueUser!!)))
                 }).catch(err => console.log(err))
             }
         })
@@ -288,7 +288,7 @@ class UserController {
                             userDAO.updateByWhere({ last_access_at: ConvertData.getDateNowStr() }, { _id: new ObjectId(valueUser._id) }).then(valueUpdate => {
                                 userDAO.open(valueUser._id).then(valueOpen => {
                                     const token = jwt.sign({ userAuth: valueOpen }, "appmovie", { expiresIn: 43200 })
-                                    const userData = UserGetObjectForJson(valueOpen, token)
+                                    const userData = UserGetObjectForJson(valueOpen!!, token)
                                     req.session.user = userData
                                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, userData))
                                 })
@@ -313,7 +313,7 @@ class UserController {
                     userDAO.create(req.body.name, req.body.birth, req.body.email, req.body.cellphone, sha1(req.body.password), level, dateNow, null, dateNow).then(async valueId => {
                         userDAO.open(valueId.toString()).then((value) => {
                             const token = jwt.sign({ userAuth: value }, "appmovie", { expiresIn: 43200 })
-                            const userData = UserGetObjectForJson(value, token)
+                            const userData = UserGetObjectForJson(value!!, token)
                             req.session.user = userData
                             DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, userData))
                         })

@@ -24,7 +24,7 @@ export default class AboutAppDAO implements AboutAppRepository, CrudRepository<A
         })
     }
 
-    openLast(): Promise<AboutApp> {
+    openLast(): Promise<AboutApp | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByLast(ABOUT_APP_NAME_OBJECT).then(value => {
                 resolve(value != null ? Object.assign(new AboutApp(), value) : null)

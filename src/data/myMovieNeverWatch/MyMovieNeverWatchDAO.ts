@@ -15,7 +15,7 @@ export default class MyMovieNeverWatchDAO implements MyMovieNeverWatchRepository
         })
     }
 
-    openByMovieIdAndUserId(movieId: string, userId: string): Promise<MyMovieNeverWatch> {
+    openByMovieIdAndUserId(movieId: string, userId: string): Promise<MyMovieNeverWatch | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(MY_MOVIE_NEVER_WATCHS_NAME_OBJECT, { movie_id: new ObjectId(movieId), user_id: new ObjectId(userId) }).then(valueJson => {
                 resolve(valueJson != null ? Object.assign(new MyMovieNeverWatch(), valueJson) : null)

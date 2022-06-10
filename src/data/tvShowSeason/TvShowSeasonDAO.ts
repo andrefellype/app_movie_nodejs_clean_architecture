@@ -7,9 +7,20 @@ import TvShowSeason from "../../domain/entity/tvShowSeason/TvShowSeason"
 import { TvShowSeasonSetObjectDB, TV_SHOW_SEASON_NAME_OBJECT } from "../../domain/entity/tvShowSeason/TvShowSeasonConst"
 
 export default class TvShowSeasonDAO implements TvShowSeasonRepository, CrudRepository<TvShowSeason> {
-    getAllByTvShowId(tvShowIds: string[]): Promise<TvShowSeason[]> {
+    getAllIdsByTvShowIdAndStatus(tvShowId: string, statusValue: boolean): Promise<TvShowSeason[]> {
         return new Promise(async (resolve, reject) => {
-            const _ids = tvShowIds.map(i => (new ObjectId(i)))
+            await Database.allByWhereAndFields(TV_SHOW_SEASON_NAME_OBJECT, { tv_show_id: (new ObjectId(tvShowId)), status: statusValue }, null, { _id: 1 }).then(valueJson => {
+                if (valueJson !== null) {
+                    resolve((valueJson as []).map(value => Object.assign(new TvShowSeason(), value)))
+                }
+            })
+            reject([])
+        })
+    }
+
+    getAllByTvShowId(tvShowIds: object[]): Promise<TvShowSeason[]> {
+        return new Promise(async (resolve, reject) => {
+            const _ids = tvShowIds
             await Database.allByWhere(TV_SHOW_SEASON_NAME_OBJECT, { tv_show_id: { $in: _ids } }).then(valueJson => {
                 if (valueJson !== null) {
                     resolve((valueJson as []).map(value => Object.assign(new TvShowSeason(), value)))
@@ -40,7 +51,7 @@ export default class TvShowSeasonDAO implements TvShowSeasonRepository, CrudRepo
         })
     }
 
-    openByNameAndTvShowId(nameValue: string, tvShowId: string): Promise<TvShowSeason> {
+    openByNameAndTvShowId(nameValue: string, tvShowId: string): Promise<TvShowSeason | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(TV_SHOW_SEASON_NAME_OBJECT, { name: nameValue, tv_show_id: (new ObjectId(tvShowId)) }).then(value => {
                 resolve(value != null ? Object.assign(new TvShowSeason(), value) : null)
@@ -78,7 +89,7 @@ export default class TvShowSeasonDAO implements TvShowSeasonRepository, CrudRepo
         })
     }
 
-    open(idOpen: string): Promise<TvShowSeason> {
+    open(idOpen: string): Promise<TvShowSeason | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(TV_SHOW_SEASON_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new TvShowSeason(), value) : null)

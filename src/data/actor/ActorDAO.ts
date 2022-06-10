@@ -27,7 +27,7 @@ export default class ActorDAO implements ActorRepository, CrudRepository<Actor> 
         })
     }
 
-    openByName(nameValue: string): Promise<Actor> {
+    openByName(nameValue: string): Promise<Actor | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(ACTOR_NAME_OBJECT, { name: nameValue }).then(value => {
                 resolve(value != null ? Object.assign(new Actor(), value) : null)
@@ -65,7 +65,7 @@ export default class ActorDAO implements ActorRepository, CrudRepository<Actor> 
         })
     }
 
-    open(idOpen: string): Promise<Actor> {
+    open(idOpen: string): Promise<Actor | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(ACTOR_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new Actor(), value) : null)

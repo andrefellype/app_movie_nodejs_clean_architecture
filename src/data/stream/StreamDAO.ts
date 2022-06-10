@@ -27,7 +27,7 @@ export default class StreamDAO implements StreamRepository, CrudRepository<Strea
         })
     }
 
-    openByName(nameValue: string): Promise<Stream> {
+    openByName(nameValue: string): Promise<Stream | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(STREAM_NAME_OBJECT, { name: nameValue }).then(value => {
                 resolve(value != null ? Object.assign(new Stream(), value) : null)
@@ -65,7 +65,7 @@ export default class StreamDAO implements StreamRepository, CrudRepository<Strea
         })
     }
 
-    open(idOpen: string): Promise<Stream> {
+    open(idOpen: string): Promise<Stream | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(STREAM_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new Stream(), value) : null)

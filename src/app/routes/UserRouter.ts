@@ -5,6 +5,7 @@ import DataReturnResponse from '../core/DataReturnResponse'
 import DataJsonResponse from '../core/DataJsonResponse'
 import UserController from '../../usercases/UserController'
 import UserDAO from '../../data/user/UserDAO'
+import User from '../../domain/entity/user/User'
 
 class UserRouter {
     private routes: Router
@@ -139,8 +140,8 @@ class UserRouter {
                 })
             }), body('cellphone').notEmpty().withMessage("Celular obrigatório").isLength({ min: 11, max: 11 }).withMessage("Formato do celular inválido").custom(async (value, { req }) => {
                 return new Promise((resolve, reject) => {
-                    if (typeof req.headers['x-access-token'] != "undefined" && req.headers['x-access-token'] != null) {
-                        let userToken = null
+                    if (req.headers != null && typeof req.headers['x-access-token'] != "undefined" && req.headers['x-access-token'] != null) {
+                        let userToken: User | null = null
                         const token = req.headers['x-access-token']
                         jwt.verify(token, "appmovie", (err, decoded) => {
                             if (err) {
@@ -151,7 +152,7 @@ class UserRouter {
                         })
                         if (userToken != null) {
                             userDAO.openByCellphone(value).then((valueUser) => {
-                                if (valueUser != null && valueUser._id != userToken._id) {
+                                if (valueUser != null && valueUser._id != userToken!!._id) {
                                     DataReturnResponse.returnReject(reject, new Error('Celular já existente'))
                                 } else {
                                     DataReturnResponse.returnResolve(resolve, true)
@@ -162,6 +163,8 @@ class UserRouter {
                         } else {
                             DataReturnResponse.returnReject(reject, new Error("token_invalidate"))
                         }
+                    } else {
+                        DataReturnResponse.returnReject(reject, new Error("FAIL"))
                     }
                 }).catch(err => {
                     throw new Error(err.message)

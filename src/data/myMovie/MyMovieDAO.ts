@@ -24,7 +24,7 @@ export default class MyMovieDAO implements MyMovieRepository, CrudRepository<MyM
         })
     }
 
-    openByMovieIdAndUserId(movieId: string, userId: string): Promise<MyMovie> {
+    openByMovieIdAndUserId(movieId: string, userId: string): Promise<MyMovie | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(MY_MOVIES_NAME_OBJECT, { movie_id: new ObjectId(movieId), user_id: new ObjectId(userId) }).then(valueJson => {
                 resolve(valueJson != null ? Object.assign(new MyMovie(), valueJson) : null)

@@ -15,7 +15,7 @@ export default class MyTvShowNeverWatchDAO implements MyTvShowNeverWatchReposito
         })
     }
 
-    openByTvShowIdAndUserId(tvShowId: string, userId: string): Promise<MyTvShowNeverWatch> {
+    openByTvShowIdAndUserId(tvShowId: string, userId: string): Promise<MyTvShowNeverWatch | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(MY_TV_SHOW_NEVER_WATCHS_NAME_OBJECT, { tv_show_id: new ObjectId(tvShowId), user_id: new ObjectId(userId) }).then(valueJson => {
                 resolve(valueJson != null ? Object.assign(new MyTvShowNeverWatch(), valueJson) : null)

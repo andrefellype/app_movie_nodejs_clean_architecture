@@ -18,9 +18,12 @@ import MyTvShowNeverWatchDAO from '../data/myTvShowNeverWatch/MyTvShowNeverWatch
 import MyTvShowController from './MyTvShowController'
 import TvShowEpisodeController from './TvShowEpisodeController'
 import TvShowSeasonController from './TvShowSeasonController'
+import Category from '../domain/entity/category/Category'
+import Country from '../domain/entity/country/Country'
+import Stream from '../domain/entity/stream/Stream'
 
 class TvShowController {
-    public async deleteTvShowOtherInformation(idsInformation: string[], typeInformation: string) {
+    public async deleteTvShowOtherInformation(idsInformation: object[], typeInformation: string) {
         if (typeInformation == "countries") {
             const tvShowDAO = new TvShowDAO()
             await tvShowDAO.getAllByCountriesId(idsInformation).then(async tvShowsJson => {
@@ -74,8 +77,8 @@ class TvShowController {
 
     private static async deleteTvShow(idsTvShow: string[], tvShowDAO: TvShowDAO) {
         await tvShowDAO.getAllByIds(idsTvShow).then(async valueJson => {
-            const idsDelete = []
-            const idsUpdate = []
+            const idsDelete: object[] = []
+            const idsUpdate: object[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 if (!valueJson[v].reviewed) {
                     idsDelete.push((new ObjectId(valueJson[v]._id)))
@@ -158,7 +161,7 @@ class TvShowController {
             } else {
                 const tvShowDAO = new TvShowDAO()
                 tvShowDAO.open(req.body.tvShowId).then(async valueJson => {
-                    let tvShow = TvShowGetObjectForJson(valueJson, req.userAuth)
+                    let tvShow = TvShowGetObjectForJson(valueJson!!, req.userAuth)
                     await TvShowController.getAllDetailsTvShow(req, tvShow).then(valueDetails => tvShow = valueDetails)
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, tvShow))
                 }).catch(err => console.log(err))
@@ -223,8 +226,8 @@ class TvShowController {
             if (validateNotMyTvShow) {
                 let countEpisode = 0
                 let countWatch = 0
-                await tvShowSeasonDAO.getAllByTvShowIdAndStatus(tvShow._id, true).then(async valuesJson => {
-                    const idsSeasons = valuesJson.map(v => v._id)
+                await tvShowSeasonDAO.getAllIdsByTvShowIdAndStatus(tvShow._id, true).then(async valuesIdSeasonJson => {
+                    const idsSeasons = valuesIdSeasonJson.map(v => v._id)
                     await tvShowEpisodeDAO.countByTvShowSeasonIdsAndStatus(idsSeasons, true).then(countJson => {
                         countEpisode = countJson
                     })
@@ -234,10 +237,10 @@ class TvShowController {
                     await myTvShowEpisodeNeverWatchDAO.countByTvShowIdAndUserId(tvShow._id, req.userAuth._id).then(countJson => {
                         countWatch += countJson
                     })
-                    for (let s = 0; s < valuesJson.length; s++) {
-                        await myTvShowSeasonNeverWatchDAO.openByTvShowSeasonIdAndUserId(valuesJson[s]._id, req.userAuth._id).then(async mtssnw => {
+                    for (let s = 0; s < idsSeasons.length; s++) {
+                        await myTvShowSeasonNeverWatchDAO.openByTvShowSeasonIdAndUserId(idsSeasons[s], req.userAuth._id).then(async mtssnw => {
                             if (mtssnw != null) {
-                                await tvShowEpisodeDAO.countByTvShowSeasonIdAndStatus(valuesJson[s]._id, true).then(countJson => {
+                                await tvShowEpisodeDAO.countByTvShowSeasonIdAndStatus(idsSeasons[s], true).then(countJson => {
                                     countWatch += countJson
                                 })
                             }
@@ -245,7 +248,7 @@ class TvShowController {
                     }
                 })
                 await myTvShowNeverWatchDAO.openByTvShowIdAndUserId(tvShow._id, req.userAuth._id).then(async mtsnw => {
-                    if(mtsnw != null || countEpisode <= countWatch){
+                    if (mtsnw != null || countEpisode <= countWatch) {
                         statusMyTvShow = false
                     }
                     tvShow.statusMyTvShow = mtsnw != null || countEpisode <= countWatch
@@ -253,36 +256,36 @@ class TvShowController {
             }
         }
         if (!validateNotMyTvShow || statusMyTvShow) {
-            const tvShowCategories = []
+            const tvShowCategories: Category[] = []
             if (req.body.object == null || req.body.object.category) {
                 for (let mca = 0; mca < tvShow.categories_id.length; mca++) {
                     await categoryDAO.open(tvShow.categories_id[mca]).then(valueJsonCategory => {
-                        if (valueJsonCategory.status) {
-                            tvShowCategories.push(valueJsonCategory)
+                        if (valueJsonCategory!!.status) {
+                            tvShowCategories.push(valueJsonCategory!!)
                         }
                     })
                 }
             }
             tvShow.categories = tvShowCategories
 
-            const tvShowCountries = []
+            const tvShowCountries: Country[] = []
             if (req.body.object == null || req.body.object.country) {
                 for (let mco = 0; mco < tvShow.countries_id.length; mco++) {
                     await countryDAO.open(tvShow.countries_id[mco]).then(valueJsonCountry => {
-                        if (valueJsonCountry.status) {
-                            tvShowCountries.push(valueJsonCountry)
+                        if (valueJsonCountry!!.status) {
+                            tvShowCountries.push(valueJsonCountry!!)
                         }
                     })
                 }
             }
             tvShow.countries = tvShowCountries
 
-            const tvShowStreams = []
+            const tvShowStreams: Stream[] = []
             if (req.body.object == null || req.body.object.stream) {
                 for (let ms = 0; ms < tvShow.streams_id.length; ms++) {
                     await streamDAO.open(tvShow.streams_id[ms]).then(valueJsonStream => {
-                        if (valueJsonStream.status) {
-                            tvShowStreams.push(valueJsonStream)
+                        if (valueJsonStream!!.status) {
+                            tvShowStreams.push(valueJsonStream!!)
                         }
                     })
                 }

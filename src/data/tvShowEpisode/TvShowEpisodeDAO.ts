@@ -17,9 +17,9 @@ export default class TvShowEpisodeDAO implements TvShowEpisodeRepository, CrudRe
         })
     }
 
-    getAllByTvShowSeasonIds(seasonIds: string[]): Promise<TvShowEpisode[]> {
+    getAllByTvShowSeasonIds(seasonIds: object[]): Promise<TvShowEpisode[]> {
         return new Promise(async (resolve, reject) => {
-            const _ids = seasonIds.map(i => new ObjectId(i))
+            const _ids = seasonIds
             await Database.allByWhere(TV_SHOW_EPISODES_NAME_OBJECT, { tv_show_season_id: { $in: _ids } }).then(valueJson => {
                 if (valueJson !== null) {
                     resolve((valueJson as []).map(value => Object.assign(new TvShowEpisode(), value)))
@@ -70,7 +70,7 @@ export default class TvShowEpisodeDAO implements TvShowEpisodeRepository, CrudRe
         })
     }
 
-    openByNameAndTvShowSeasonId(nameValue: string, tvShowSeasonId: string): Promise<TvShowEpisode> {
+    openByNameAndTvShowSeasonId(nameValue: string, tvShowSeasonId: string): Promise<TvShowEpisode | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(TV_SHOW_EPISODES_NAME_OBJECT, { name: nameValue, tv_show_season_id: (new ObjectId(tvShowSeasonId)) }).then(value => {
                 resolve(value != null ? Object.assign(new TvShowEpisode(), value) : null)
@@ -108,7 +108,7 @@ export default class TvShowEpisodeDAO implements TvShowEpisodeRepository, CrudRe
         })
     }
 
-    open(idOpen: string): Promise<TvShowEpisode> {
+    open(idOpen: string): Promise<TvShowEpisode | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(TV_SHOW_EPISODES_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new TvShowEpisode(), value) : null)

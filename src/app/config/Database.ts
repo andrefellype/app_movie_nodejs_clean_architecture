@@ -50,11 +50,11 @@ export default class Database {
         return this.deleteFields(nameObject)
     }
 
-    public static deleteByWhere(nameObject: string, where: object = null) {
+    public static deleteByWhere(nameObject: string, where: object | null = null) {
         return this.deleteFields(nameObject, where)
     }
 
-    private static deleteFields(nameObject: string, where: object = {}) {
+    private static deleteFields(nameObject: string, where: object | null = {}) {
         return new Promise(async (resolve, reject) => {
             if (where != null) {
                 const connection = await this.connectDb()
@@ -71,21 +71,28 @@ export default class Database {
         })
     }
 
-    public static allByWhere(nameObject: string, where: object = {}, orderBy: object = null) {
+    public static allByWhereAndFields(nameObject: string, where: object = {}, orderBy: object | null = null, fields = {}) {
+        if (orderBy != null) {
+            return this.allFields(nameObject, where, orderBy, null, fields)
+        }
+        return this.allFields(nameObject, where, null, null, fields)
+    }
+
+    public static allByWhere(nameObject: string, where: object = {}, orderBy: object | null = null) {
         if (orderBy != null) {
             return this.allFields(nameObject, where, orderBy)
         }
         return this.allFields(nameObject, where)
     }
 
-    public static all(nameObject: string, orderBy: object = null) {
+    public static all(nameObject: string, orderBy: object | null = null) {
         if (orderBy != null) {
             return this.allFields(nameObject, null, orderBy)
         }
         return this.allFields(nameObject)
     }
 
-    private static allFields(nameObject: string, where = {}, orderBy = {}, limit = null, fields = {}) {
+    private static allFields(nameObject: string, where: object | null = {}, orderBy: object | null = {}, limit = null, fields = {}) {
         return new Promise(async (resolve, reject) => {
             const connection = await this.connectDb()
             await connection.connect()
@@ -108,11 +115,11 @@ export default class Database {
         return this.updateFields(nameObject, data)
     }
 
-    public static updateByWhere(nameObject: string, data: object = {}, where: object = null) {
+    public static updateByWhere(nameObject: string, data: object = {}, where: object | null = null) {
         return this.updateFields(nameObject, data, where)
     }
 
-    private static updateFields(nameObject: string, data = {}, where = {}) {
+    private static updateFields(nameObject: string, data = {}, where: object | null = {}) {
         return new Promise(async (resolve, reject) => {
             const connection = await this.connectDb()
             await connection.connect()

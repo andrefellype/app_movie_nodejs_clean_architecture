@@ -3,7 +3,7 @@ import User from "./user"
 export const USER_NAME_OBJECT = "users"
 
 export function UserSetObjectDB(
-    nameValue: string, birthValue: string, emailValue: string, cellphoneValue: string, passwordValue: string, levelValue: string, codeRecoveryValue: string, enabledValue: boolean, statusValue: boolean,
+    nameValue: string, birthValue: string, emailValue: string, cellphoneValue: string, passwordValue: string, levelValue: string, codeRecoveryValue: string | null, enabledValue: boolean, statusValue: boolean,
     createdAtValue: string, updatedAtValue: string | null = null, lastAccessAtValue: string | null = null
 ) {
     return {

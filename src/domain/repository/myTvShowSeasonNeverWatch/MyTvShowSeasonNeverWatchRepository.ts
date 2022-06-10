@@ -2,5 +2,5 @@ import MyTvShowSeasonNeverWatch from "../../entity/myTvShowSeasonNeverWatch/MyTv
 
 export default interface MyTvShowSeasonNeverWatchRepository {
     deleteAll(where: object): Promise<boolean>
-    openByTvShowSeasonIdAndUserId(seasonId: string, userId: string): Promise<MyTvShowSeasonNeverWatch>
+    openByTvShowSeasonIdAndUserId(seasonId: string, userId: string): Promise<MyTvShowSeasonNeverWatch | null>
 }

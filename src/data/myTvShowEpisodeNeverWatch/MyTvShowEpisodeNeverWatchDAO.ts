@@ -33,7 +33,7 @@ export default class MyTvShowEpisodeNeverWatchDAO implements MyTvShowEpisodeNeve
         })
     }
 
-    openByTvShowEpisodeIdAndUserId(episodeId: string, userId: string): Promise<MyTvShowEpisodeNeverWatch> {
+    openByTvShowEpisodeIdAndUserId(episodeId: string, userId: string): Promise<MyTvShowEpisodeNeverWatch | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(MY_TV_SHOW_EPISODE_NEVER_WATCHS_NAME_OBJECT, { tv_show_episode_id: (new ObjectId(episodeId)), user_id: new ObjectId(userId) }).then(valueJson => {
                 resolve(valueJson != null ? Object.assign(new MyTvShowEpisodeNeverWatch(), valueJson) : null)

@@ -27,7 +27,7 @@ export default class MovieDAO implements MovieRepository, CrudRepository<Movie> 
         })
     }
 
-    getAllByStreamsId(streamsIdValue: string[]): Promise<Movie[]> {
+    getAllByStreamsId(streamsIdValue: object[]): Promise<Movie[]> {
         return new Promise(async (resolve, reject) => {
             await Database.allByWhere(MOVIE_NAME_OBJECT, { streams_id: { $in: streamsIdValue } }).then(valueJson => {
                 if (valueJson !== null) {
@@ -38,7 +38,7 @@ export default class MovieDAO implements MovieRepository, CrudRepository<Movie> 
         })
     }
 
-    getAllByCountriesId(countriesIdValue: string[]): Promise<Movie[]> {
+    getAllByCountriesId(countriesIdValue: object[]): Promise<Movie[]> {
         return new Promise(async (resolve, reject) => {
             await Database.allByWhere(MOVIE_NAME_OBJECT, { countries_id: { $in: countriesIdValue } }).then(valueJson => {
                 if (valueJson !== null) {
@@ -49,7 +49,7 @@ export default class MovieDAO implements MovieRepository, CrudRepository<Movie> 
         })
     }
 
-    getAllByCastsId(castsIdValue: string[]): Promise<Movie[]> {
+    getAllByCastsId(castsIdValue: object[]): Promise<Movie[]> {
         return new Promise(async (resolve, reject) => {
             await Database.allByWhere(MOVIE_NAME_OBJECT, { casts_id: { $in: castsIdValue } }).then(valueJson => {
                 if (valueJson !== null) {
@@ -60,7 +60,7 @@ export default class MovieDAO implements MovieRepository, CrudRepository<Movie> 
         })
     }
 
-    getAllByDirectorsId(directorsIdValue: string[]): Promise<Movie[]> {
+    getAllByDirectorsId(directorsIdValue: object[]): Promise<Movie[]> {
         return new Promise(async (resolve, reject) => {
             await Database.allByWhere(MOVIE_NAME_OBJECT, { directors_id: { $in: directorsIdValue } }).then(valueJson => {
                 if (valueJson !== null) {
@@ -71,7 +71,7 @@ export default class MovieDAO implements MovieRepository, CrudRepository<Movie> 
         })
     }
 
-    openByTitle(titleValue: string): Promise<Movie> {
+    openByTitle(titleValue: string): Promise<Movie | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(MOVIE_NAME_OBJECT, { title: titleValue }).then(value => {
                 resolve(value != null ? Object.assign(new Movie(), value) : null)
@@ -109,7 +109,7 @@ export default class MovieDAO implements MovieRepository, CrudRepository<Movie> 
         })
     }
 
-    open(idOpen: string): Promise<Movie> {
+    open(idOpen: string): Promise<Movie | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(MOVIE_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new Movie(), value) : null)

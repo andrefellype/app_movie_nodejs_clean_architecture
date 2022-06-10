@@ -60,7 +60,7 @@ class CategoryController {
             } else {
                 const categoryDAO = new CategoryDAO()
                 categoryDAO.open(req.body.categoryId).then(async valueJson => {
-                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, CategoryGetObjectForJson(valueJson)))
+                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, CategoryGetObjectForJson(valueJson!!)))
                 }).catch(err => console.log(err))
             }
         })

@@ -14,10 +14,10 @@ import MyTvShowController from './MyTvShowController'
 import TvShowEpisodeController from './TvShowEpisodeController'
 
 class TvShowSeasonController {
-    public async deleteSeasonAllByTvShowId(tvShowIds: string[]) {
+    public async deleteSeasonAllByTvShowId(tvShowIds: object[]) {
         const tvShowSeasonDAO = new TvShowSeasonDAO()
         await tvShowSeasonDAO.getAllByTvShowId(tvShowIds).then(async valueJson => {
-            const idsDelete = []
+            const idsDelete: object[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 idsDelete.push((new ObjectId(valueJson[v]._id)))
             }
@@ -44,7 +44,7 @@ class TvShowSeasonController {
                     if (req.userAuth.level != "ADMIN") {
                         seasons = seasons.filter(season => season.reviewed || (season.user_register == req.userAuth._id))
                     }
-                    const seasonsNew = []
+                    const seasonsNew: object[] = []
                     for (let s = 0; s < seasons.length; s++) {
                         let statusSeason = true
                         let countEpisode = 0
@@ -78,8 +78,8 @@ class TvShowSeasonController {
 
     private static async deleteSeason(idsSeason: string[], tvShowSeasonDAO: TvShowSeasonDAO, tvShowEpisodeDAO: TvShowEpisodeDAO) {
         await tvShowSeasonDAO.getAllByIds(idsSeason).then(async valueJson => {
-            const idsDelete = []
-            const idsUpdate = []
+            const idsDelete: object[] = []
+            const idsUpdate: object[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 if (!valueJson[v].reviewed) {
                     idsDelete.push((new ObjectId(valueJson[v]._id)))
@@ -156,7 +156,7 @@ class TvShowSeasonController {
             } else {
                 const tvShowSeasonDAO = new TvShowSeasonDAO()
                 tvShowSeasonDAO.open(req.body.tvShowSeasonId).then(async valueJson => {
-                    const season = TvShowSeasonGetObjectForJson(valueJson, req.userAuth)
+                    const season = TvShowSeasonGetObjectForJson(valueJson!!, req.userAuth)
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, season))
                 }).catch(err => console.log(err))
             }

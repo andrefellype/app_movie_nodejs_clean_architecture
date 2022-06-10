@@ -42,7 +42,7 @@ export default class MyTvShowEpisodeDAO implements MyTvShowEpisodeRepository, Cr
         })
     }
 
-    openByTvShowEpisodeIdAndUserId(tvShowEpisodeId: string, userId: string): Promise<MyTvShowEpisode> {
+    openByTvShowEpisodeIdAndUserId(tvShowEpisodeId: string, userId: string): Promise<MyTvShowEpisode | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(MY_TV_SHOW_EPISODES_NAME_OBJECT, { tv_show_episode_id: (new ObjectId(tvShowEpisodeId)), user_id: new ObjectId(userId) }).then(valueJson => {
                 resolve(valueJson != null ? Object.assign(new MyTvShowEpisode(), valueJson) : null)

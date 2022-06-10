@@ -12,13 +12,13 @@ import MyTvShowController from './MyTvShowController'
 import TvShowSeasonDAO from '../data/tvShowSeason/TvShowSeasonDAO'
 
 class TvShowEpisodeController {
-    public async deleteEpisodeAllByTvShowId(tvShowIds: string[]) {
+    public async deleteEpisodeAllByTvShowId(tvShowIds: object[]) {
         const tvShowSeasonDAO = new TvShowSeasonDAO()
         const tvShowEpisodeDAO = new TvShowEpisodeDAO()
         await tvShowSeasonDAO.getAllByTvShowId(tvShowIds).then(async seasonsJson => {
-            const tvShowSeasonIds = seasonsJson.map(s => s._id)
+            const tvShowSeasonIds = seasonsJson.map(s => (new ObjectId(s._id)))
             await tvShowEpisodeDAO.getAllByTvShowSeasonIds(tvShowSeasonIds).then(async valueJson => {
-                const idsDelete = []
+                const idsDelete: object[] = []
                 for (let v = 0; v < valueJson.length; v++) {
                     idsDelete.push((new ObjectId(valueJson[v]._id)))
                 }
@@ -28,16 +28,16 @@ class TvShowEpisodeController {
         })
     }
 
-    public async deleteEpisodeAllByTvSeasonId(tvShowSeasonIds: string[]) {
+    public async deleteEpisodeAllByTvSeasonId(tvShowSeasonIds: object[]) {
         const tvShowEpisodeDAO = new TvShowEpisodeDAO()
         await tvShowEpisodeDAO.getAllByTvShowSeasonIds(tvShowSeasonIds).then(async valueJson => {
-            const idsDelete = []
+            const idsDelete: object[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 idsDelete.push((new ObjectId(valueJson[v]._id)))
             }
             await MyTvShowController.deleteMyTvShowEpisodeAllByTvShowEpisodeId(idsDelete)
         })
-        const _ids = tvShowSeasonIds.map(i => new ObjectId(i))
+        const _ids = tvShowSeasonIds
         await tvShowEpisodeDAO.deleteAll({ tv_show_season_id: { $in: _ids } })
     }
 
@@ -55,7 +55,7 @@ class TvShowEpisodeController {
                     if (req.userAuth.level != "ADMIN") {
                         episodes = episodes.filter(season => season.reviewed || (season.user_register == req.userAuth._id))
                     }
-                    const episodesNew = []
+                    const episodesNew: object[] = []
                     for (let e = 0; e < episodes.length; e++) {
                         let statusEpisode = true
                         await myTvShowEpisodeDAO.openByTvShowEpisodeIdAndUserId(episodes[e]._id, req.userAuth._id).then(mtse => {
@@ -80,8 +80,8 @@ class TvShowEpisodeController {
 
     private static async deleteEpisode(tvShowEpisodeIds: string[], tvShowEpisodeDAO: TvShowEpisodeDAO) {
         await tvShowEpisodeDAO.getAllByIds(tvShowEpisodeIds).then(async valueJson => {
-            const idsDelete = []
-            const idsUpdate = []
+            const idsDelete: object[] = []
+            const idsUpdate: object[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 if (!valueJson[v].reviewed) {
                     idsDelete.push((new ObjectId(valueJson[v]._id)))
@@ -156,7 +156,7 @@ class TvShowEpisodeController {
             } else {
                 const tvShowEpisodeDAO = new TvShowEpisodeDAO()
                 tvShowEpisodeDAO.open(req.body.tvShowEpisodeId).then(async valueJson => {
-                    const episode = TvShowEpisodeGetObjectForJson(valueJson, req.userAuth)
+                    const episode = TvShowEpisodeGetObjectForJson(valueJson!!, req.userAuth)
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, episode))
                 }).catch(err => console.log(err))
             }

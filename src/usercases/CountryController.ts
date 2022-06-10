@@ -12,8 +12,8 @@ import TvShowController from './TvShowController'
 class CountryController {
     private static async deleteCountry(idsCountry, countryDAO: CountryDAO) {
         await countryDAO.getAllByIds(idsCountry).then(async valueJson => {
-            const idsDelete = []
-            const idsUpdate = []
+            const idsDelete: object[] = []
+            const idsUpdate: object[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 if (!valueJson[v].reviewed) {
                     idsDelete.push((new ObjectId(valueJson[v]._id)))
@@ -89,7 +89,7 @@ class CountryController {
             } else {
                 const countryDAO = new CountryDAO()
                 countryDAO.open(req.body.countryId).then(async valueJson => {
-                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, CountryGetObjectForJson(valueJson)))
+                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, CountryGetObjectForJson(valueJson!!)))
                 }).catch(err => console.log(err))
             }
         })

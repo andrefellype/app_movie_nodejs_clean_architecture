@@ -27,7 +27,7 @@ export default class DirectorDAO implements DirectorRepository, CrudRepository<D
         })
     }
 
-    openByName(nameValue: string): Promise<Director> {
+    openByName(nameValue: string): Promise<Director | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(DIRECTOR_NAME_OBJECT, { name: nameValue }).then(value => {
                 resolve(value != null ? Object.assign(new Director(), value) : null)
@@ -65,7 +65,7 @@ export default class DirectorDAO implements DirectorRepository, CrudRepository<D
         })
     }
 
-    open(idOpen: string): Promise<Director> {
+    open(idOpen: string): Promise<Director | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(DIRECTOR_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new Director(), value) : null)

@@ -14,8 +14,8 @@ import TvShowController from './TvShowController'
 class StreamController {
     private static async deleteStream(idsStream: string[], streamDAO: StreamDAO, movieDAO: MovieDAO, tvShowDAO: TvShowDAO) {
         await streamDAO.getAllByIds(idsStream).then(async valueJson => {
-            const idsDelete = []
-            const idsUpdate = []
+            const idsDelete: object[] = []
+            const idsUpdate: object[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 if (!valueJson[v].reviewed) {
                     idsDelete.push((new ObjectId(valueJson[v]._id)))
@@ -91,7 +91,7 @@ class StreamController {
             } else {
                 const streamDAO = new StreamDAO()
                 streamDAO.open(req.body.streamId).then(async valueJson => {
-                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, StreamGetObjectForJson(valueJson)))
+                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, StreamGetObjectForJson(valueJson!!)))
                 }).catch(err => console.log(err))
             }
         })

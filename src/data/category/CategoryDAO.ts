@@ -6,7 +6,7 @@ import CrudRepository from "../../domain/repository/CrudRepository"
 import { CategorySetObjectDB, CATEGORY_NAME_OBJECT } from "../../domain/entity/category/CategoryConst"
 
 export default class CategoryDAO implements CategoryRepository, CrudRepository<Category> {
-    openByName(nameValue: string): Promise<Category> {
+    openByName(nameValue: string): Promise<Category | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(CATEGORY_NAME_OBJECT, { name: nameValue }).then(value => {
                 resolve(value != null ? Object.assign(new Category(), value) : null)
@@ -44,7 +44,7 @@ export default class CategoryDAO implements CategoryRepository, CrudRepository<C
         })
     }
 
-    open(idOpen: string): Promise<Category> {
+    open(idOpen: string): Promise<Category | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(CATEGORY_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new Category(), value) : null)

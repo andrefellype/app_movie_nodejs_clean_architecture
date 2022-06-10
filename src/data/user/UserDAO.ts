@@ -17,7 +17,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
-    openByCodeRecovery(codeRecoveryValue: string): Promise<User> {
+    openByCodeRecovery(codeRecoveryValue: string): Promise<User | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(USER_NAME_OBJECT, { code_recovery: codeRecoveryValue }).then(value => {
                 resolve(value != null ? Object.assign(new User(), value) : null)
@@ -26,7 +26,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
-    openByCellphoneAndPassword(cellphoneValue: string, passwordValue: string): Promise<User> {
+    openByCellphoneAndPassword(cellphoneValue: string, passwordValue: string): Promise<User | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(USER_NAME_OBJECT, { status: true, cellphone: cellphoneValue, password: passwordValue }).then(value => {
                 resolve(value != null ? Object.assign(new User(), value) : null)
@@ -35,7 +35,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
-    openByCellphone(cellphoneValue: string): Promise<User> {
+    openByCellphone(cellphoneValue: string): Promise<User | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(USER_NAME_OBJECT, { cellphone: cellphoneValue }).then(value => {
                 resolve(value != null ? Object.assign(new User(), value) : null)
@@ -62,7 +62,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
-    open(idOpen: string): Promise<User> {
+    open(idOpen: string): Promise<User | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(USER_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new User(), value) : null)
@@ -71,7 +71,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
-    create(nameValue: string, birthValue: string, emailValue: string, cellphoneValue: string, passwordValue: string, levelValue: string, createdAtValue: string, updatedAtValue?: string, lastAccessAtValue?: string): Promise<string> {
+    create(nameValue: string, birthValue: string, emailValue: string, cellphoneValue: string, passwordValue: string, levelValue: string, createdAtValue: string, updatedAtValue?: string | null, lastAccessAtValue?: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const objectDb = UserSetObjectDB(nameValue, birthValue, emailValue, cellphoneValue, passwordValue, levelValue, null, true, true, createdAtValue, updatedAtValue, lastAccessAtValue)
             await Database.insert(USER_NAME_OBJECT, objectDb).then(valueJson => {
