@@ -35,6 +35,15 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
+    openByEmail(emailValue: string): Promise<User | null> {
+        return new Promise(async (resolve, reject) => {
+            await Database.openByWhere(USER_NAME_OBJECT, { email: emailValue }).then(value => {
+                resolve(value != null ? Object.assign(new User(), value) : null)
+            })
+            reject(null)
+        })
+    }
+
     openByCellphone(cellphoneValue: string): Promise<User | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(USER_NAME_OBJECT, { cellphone: cellphoneValue }).then(value => {

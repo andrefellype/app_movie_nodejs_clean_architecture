@@ -93,6 +93,24 @@ class UserRouter {
                 }).catch(err => {
                     throw new Error(err.message)
                 })
+            }), body('email').custom(async (value, { req }) => {
+                return new Promise((resolve, reject) => {
+                    if (req.body.email != null && req.body.email.length > 0) {
+                        userDAO.openByEmail(value).then((valueUser) => {
+                            if (valueUser != null) {
+                                DataReturnResponse.returnReject(reject, new Error('Email já existente'))
+                            } else {
+                                DataReturnResponse.returnResolve(resolve, true)
+                            }
+                        }).catch(err => {
+                            DataReturnResponse.returnReject(reject, new Error(err.message))
+                        })
+                    } else {
+                        DataReturnResponse.returnResolve(resolve, true)
+                    }
+                }).catch(err => {
+                    throw new Error(err.message)
+                })
             }), body('password').notEmpty().withMessage("Senha obrigatória").isLength({ min: 6, max: 15 }).withMessage("A senha deve ter conter no mínimo 6 caracteres e no máximo 15 caracteres"),
             body('password_confirm').notEmpty().withMessage("Confirmação de senha obrigatória").custom((value, { req }) => {
                 if (value !== req.body.password) {
@@ -162,6 +180,37 @@ class UserRouter {
                             })
                         } else {
                             DataReturnResponse.returnReject(reject, new Error("token_invalidate"))
+                        }
+                    } else {
+                        DataReturnResponse.returnReject(reject, new Error("FAIL"))
+                    }
+                }).catch(err => {
+                    throw new Error(err.message)
+                })
+            }), body('email').custom(async (value, { req }) => {
+                return new Promise((resolve, reject) => {
+                    if (req.headers != null && typeof req.headers['x-access-token'] != "undefined" && req.headers['x-access-token'] != null) {
+                        let userToken: User | null = null
+                        const token = req.headers['x-access-token']
+                        jwt.verify(token, "appmovie", (err, decoded) => {
+                            if (err) {
+                                DataReturnResponse.returnReject(reject, new Error("token_invalidate"))
+                            } else {
+                                userToken = decoded.userAuth
+                            }
+                        })
+                        if (req.body.email != null && req.body.email.length > 0) {
+                            userDAO.openByEmail(value).then((valueUser) => {
+                                if (valueUser != null && valueUser._id != userToken!!._id) {
+                                    DataReturnResponse.returnReject(reject, new Error('Email já existente'))
+                                } else {
+                                    DataReturnResponse.returnResolve(resolve, true)
+                                }
+                            }).catch(err => {
+                                DataReturnResponse.returnReject(reject, new Error(err.message))
+                            })
+                        } else {
+                            DataReturnResponse.returnResolve(resolve, true)
                         }
                     } else {
                         DataReturnResponse.returnReject(reject, new Error("FAIL"))
@@ -239,6 +288,24 @@ class UserRouter {
                     }).catch(err => {
                         DataReturnResponse.returnReject(reject, new Error(err.message))
                     })
+                }).catch(err => {
+                    throw new Error(err.message)
+                })
+            }), body('email').custom(async (value, { req }) => {
+                return new Promise((resolve, reject) => {
+                    if (req.body.email != null && req.body.email.length > 0) {
+                        userDAO.openByEmail(value).then((valueUser) => {
+                            if (valueUser != null) {
+                                DataReturnResponse.returnReject(reject, new Error('Email já existente'))
+                            } else {
+                                DataReturnResponse.returnResolve(resolve, true)
+                            }
+                        }).catch(err => {
+                            DataReturnResponse.returnReject(reject, new Error(err.message))
+                        })
+                    } else {
+                        DataReturnResponse.returnResolve(resolve, true)
+                    }
                 }).catch(err => {
                     throw new Error(err.message)
                 })
