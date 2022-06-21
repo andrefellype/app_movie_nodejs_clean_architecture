@@ -21,53 +21,53 @@ import Country from '../domain/entity/country/Country'
 import Stream from '../domain/entity/stream/Stream'
 
 class MovieController {
-    public async deleteMovieOtherInformation(idsInformation: object[], typeInformation: string) {
+    public async deleteExtraInformationByMovieId(idsInformation: string[], typeInformation: string) {
         if (typeInformation == "directors") {
             const movieDAO = new MovieDAO()
-            await movieDAO.getAllByDirectorsId(idsInformation).then(async moviesJson => {
-                const valuesUpdate: { data: object, idValue: object }[] = []
+            await movieDAO.getAllByDirectorsIds(idsInformation).then(async moviesJson => {
+                const valuesUpdate: { data: object, idValue: string }[] = []
                 for (let m = 0; m < moviesJson.length; m++) {
                     const directors = moviesJson[m].directors_id.filter(f => idsInformation.filter(i => i.toString() == f.toString()).length == 0)
-                    valuesUpdate.push({ data: { directors_id: directors }, idValue: new ObjectId(moviesJson[m]._id) })
+                    valuesUpdate.push({ data: { directors_id: directors }, idValue: moviesJson[m]._id })
                 }
                 for (let v = 0; v < valuesUpdate.length; v++) {
-                    movieDAO.updateByWhere(valuesUpdate[v].data, { _id: valuesUpdate[v].idValue })
+                    movieDAO.updateById(valuesUpdate[v].data, valuesUpdate[v].idValue)
                 }
             })
         } else if (typeInformation == "casts") {
             const movieDAO = new MovieDAO()
-            await movieDAO.getAllByCastsId(idsInformation).then(async moviesJson => {
-                const valuesUpdate: { data: object, idValue: object }[] = []
+            await movieDAO.getAllByCastsIds(idsInformation).then(async moviesJson => {
+                const valuesUpdate: { data: object, idValue: string }[] = []
                 for (let m = 0; m < moviesJson.length; m++) {
                     const casts = moviesJson[m].casts_id.filter(f => idsInformation.filter(i => i.toString() == f.toString()).length == 0)
-                    valuesUpdate.push({ data: { casts_id: casts }, idValue: new ObjectId(moviesJson[m]._id) })
+                    valuesUpdate.push({ data: { casts_id: casts }, idValue: moviesJson[m]._id })
                 }
                 for (let v = 0; v < valuesUpdate.length; v++) {
-                    movieDAO.updateByWhere(valuesUpdate[v].data, { _id: valuesUpdate[v].idValue })
+                    movieDAO.updateById(valuesUpdate[v].data, valuesUpdate[v].idValue)
                 }
             })
         } else if (typeInformation == "countries") {
             const movieDAO = new MovieDAO()
-            await movieDAO.getAllByCountriesId(idsInformation).then(async moviesJson => {
-                const valuesUpdate: { data: object, idValue: object }[] = []
+            await movieDAO.getAllByCountriesIds(idsInformation).then(async moviesJson => {
+                const valuesUpdate: { data: object, idValue: string }[] = []
                 for (let m = 0; m < moviesJson.length; m++) {
                     const countries = moviesJson[m].countries_id.filter(f => idsInformation.filter(i => i.toString() == f.toString()).length == 0)
-                    valuesUpdate.push({ data: { countries_id: countries }, idValue: new ObjectId(moviesJson[m]._id) })
+                    valuesUpdate.push({ data: { countries_id: countries }, idValue: moviesJson[m]._id })
                 }
                 for (let v = 0; v < valuesUpdate.length; v++) {
-                    movieDAO.updateByWhere(valuesUpdate[v].data, { _id: valuesUpdate[v].idValue })
+                    movieDAO.updateById(valuesUpdate[v].data, valuesUpdate[v].idValue)
                 }
             })
         } else if (typeInformation == "streams") {
             const movieDAO = new MovieDAO()
-            await movieDAO.getAllByStreamsId(idsInformation).then(async moviesJson => {
-                const valuesUpdate: { data: object, idValue: object }[] = []
+            await movieDAO.getAllByStreamsIds(idsInformation).then(async moviesJson => {
+                const valuesUpdate: { data: object, idValue: string }[] = []
                 for (let m = 0; m < moviesJson.length; m++) {
                     const streams = moviesJson[m].streams_id.filter(f => idsInformation.filter(i => i.toString() == f.toString()).length == 0)
-                    valuesUpdate.push({ data: { streams_id: streams }, idValue: new ObjectId(moviesJson[m]._id) })
+                    valuesUpdate.push({ data: { streams_id: streams }, idValue: moviesJson[m]._id })
                 }
                 for (let v = 0; v < valuesUpdate.length; v++) {
-                    movieDAO.updateByWhere(valuesUpdate[v].data, { _id: valuesUpdate[v].idValue })
+                    movieDAO.updateById(valuesUpdate[v].data, valuesUpdate[v].idValue)
                 }
             })
         }
@@ -95,63 +95,62 @@ class MovieController {
         })
     }
 
-    private static async deleteMovie(idsMovie: string[], movieDAO: MovieDAO) {
+    private static async deleteMovieByIds(idsMovie: string[], movieDAO: MovieDAO) {
         await movieDAO.getAllByIds(idsMovie).then(async valueJson => {
-            const idsDelete: object[] = []
-            const idsUpdate: object[] = []
+            const idsDelete: string[] = []
+            const idsUpdate: string[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 if (!valueJson[v].reviewed) {
-                    idsDelete.push((new ObjectId(valueJson[v]._id)))
+                    idsDelete.push(valueJson[v]._id)
                 } else {
-                    idsUpdate.push((new ObjectId(valueJson[v]._id)))
+                    idsUpdate.push(valueJson[v]._id)
                 }
             }
             await MyMovieController.deleteMyMovieAllByMovieId(idsDelete)
-            await movieDAO.deleteAll({ _id: { $in: idsDelete } })
-            await movieDAO.updateByWhere({ status: false, "updated_at": ConvertData.getDateNowStr() }, { _id: { $in: idsUpdate } })
+            await movieDAO.deleteAllByIds(idsDelete)
+            await movieDAO.updateByIds({ status: false, "updated_at": ConvertData.getDateNowStr() }, idsUpdate)
         })
     }
 
-    public deleteSeveral(req: Request, res: Response): Promise<string> {
+    public deleteSeveralByIds(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                const ids = JSON.parse(req.body._ids)
-                await MovieController.deleteMovie(ids, (new MovieDAO()))
+                await MovieController.deleteMovieByIds(JSON.parse(req.body._ids), (new MovieDAO()))
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }
         })
     }
 
-    public delete(req: Request, res: Response): Promise<string> {
+    public deleteById(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                await MovieController.deleteMovie([req.body.movieId], (new MovieDAO()))
+                await MovieController.deleteMovieByIds([req.body.movieId], (new MovieDAO()))
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }
         })
     }
 
-    public approved(req: Request, res: Response): Promise<string> {
+    public updateApprovedById(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const movieDAO = new MovieDAO()
-                movieDAO.updateByWhere({ reviewed: true, updated_at: ConvertData.getDateNowStr() }, { _id: new ObjectId(req.body.movieId) }).then(async valueUpdate => {
+                movieDAO.updateById({ reviewed: true, updated_at: ConvertData.getDateNowStr() }, req.body.movieId).then(async valueUpdate => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                 }).catch(err => console.log(err))
             }
         })
     }
 
-    public update(req: Request, res: Response): Promise<string> {
+    public updateById(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
@@ -165,11 +164,11 @@ class MovieController {
                 const casts = req.body.casts.map(ac => new ObjectId(ac))
                 const countries = req.body.countries.map(co => new ObjectId(co))
                 const streams = req.body.streams.map(st => new ObjectId(st))
-                movieDAO.updateByWhere({
+                movieDAO.updateById({
                     title: req.body.title, release: req.body.release, duration: durationValue, movie_theater: movieTheater,
                     resume: req.body.resume, categories_id: categories, directors_id: directors, casts_id: casts, countries_id: countries,
                     streams_id: streams, updated_at: ConvertData.getDateNowStr()
-                }, { _id: new ObjectId(req.body.movieId) }).then(async valueUpdate => {
+                }, req.body.movieId).then(async valueUpdate => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                 }).catch(err => console.log(err))
             }
@@ -183,7 +182,7 @@ class MovieController {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const movieDAO = new MovieDAO()
-                movieDAO.open(req.body.movieId).then(async valueJson => {
+                movieDAO.openById(req.body.movieId).then(async valueJson => {
                     let movie = MovieGetObjectForJson(valueJson!!, req.userAuth)
                     await MovieController.getAllDetailsMovie(req, movie).then(valueDetails => movie = valueDetails)
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, movie))
@@ -269,7 +268,7 @@ class MovieController {
             const movieCategories: Category[] = []
             if (req.body.object == null || req.body.object.category) {
                 for (let mca = 0; mca < movie.categories_id.length; mca++) {
-                    await categoryDAO.open(movie.categories_id[mca]).then(valueJsonCategory => {
+                    await categoryDAO.openById(movie.categories_id[mca]).then(valueJsonCategory => {
                         if (valueJsonCategory!!.status) {
                             movieCategories.push(valueJsonCategory!!)
                         }
@@ -281,7 +280,7 @@ class MovieController {
             const movieDirectors: Director[] = []
             if (req.body.object == null || req.body.object.director) {
                 for (let md = 0; md < movie.directors_id.length; md++) {
-                    await directorDAO.open(movie.directors_id[md]).then(valueJsonDirector => {
+                    await directorDAO.openById(movie.directors_id[md]).then(valueJsonDirector => {
                         if (valueJsonDirector!!.status) {
                             movieDirectors.push(valueJsonDirector!!)
                         }
@@ -293,7 +292,7 @@ class MovieController {
             const movieCasts: Actor[] = []
             if (req.body.object == null || req.body.object.cast) {
                 for (let mc = 0; mc < movie.casts_id.length; mc++) {
-                    await actorDAO.open(movie.casts_id[mc]).then(valueJsonActor => {
+                    await actorDAO.openById(movie.casts_id[mc]).then(valueJsonActor => {
                         if (valueJsonActor!!.status) {
                             movieCasts.push(valueJsonActor!!)
                         }
@@ -305,7 +304,7 @@ class MovieController {
             const movieCountries: Country[] = []
             if (req.body.object == null || req.body.object.country) {
                 for (let mco = 0; mco < movie.countries_id.length; mco++) {
-                    await countryDAO.open(movie.countries_id[mco]).then(valueJsonCountry => {
+                    await countryDAO.openById(movie.countries_id[mco]).then(valueJsonCountry => {
                         if (valueJsonCountry!!.status) {
                             movieCountries.push(valueJsonCountry!!)
                         }
@@ -317,7 +316,7 @@ class MovieController {
             const movieStreams: Stream[] = []
             if (req.body.object == null || req.body.object.stream) {
                 for (let ms = 0; ms < movie.streams_id.length; ms++) {
-                    await streamDAO.open(movie.streams_id[ms]).then(valueJsonStream => {
+                    await streamDAO.openById(movie.streams_id[ms]).then(valueJsonStream => {
                         if (valueJsonStream!!.status) {
                             movieStreams.push(valueJsonStream!!)
                         }

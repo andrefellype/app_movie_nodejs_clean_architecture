@@ -6,9 +6,10 @@ import CountryRepository from "../../domain/repository/country/CountryRepository
 import { CountrySetObjectDB, COUNTRY_NAME_OBJECT } from "../../domain/entity/country/CountryConst"
 
 export default class CountryDAO implements CountryRepository, CrudRepository<Country> {
-    deleteAll(where: object): Promise<boolean> {
+    deleteAllByIds(ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.deleteByWhere(COUNTRY_NAME_OBJECT, where).then(value => {
+            const _ids = ids.map(i => new ObjectId(i))
+            await Database.deleteByWhere(COUNTRY_NAME_OBJECT, { _id: { $in: _ids }}).then(value => {
                 resolve(true)
             })
             reject(null)
@@ -47,7 +48,7 @@ export default class CountryDAO implements CountryRepository, CrudRepository<Cou
         })
     }
 
-    delete(idDelete: string): Promise<boolean> {
+    deleteById(idDelete: string): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             await Database.deleteByWhere(COUNTRY_NAME_OBJECT, { _id: new ObjectId(idDelete) }).then(value => {
                 resolve(true)
@@ -55,17 +56,31 @@ export default class CountryDAO implements CountryRepository, CrudRepository<Cou
             reject(null)
         })
     }
-
+    
     updateByWhere(data: object, where: object): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+
+    updateByIds(data: object, ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.updateByWhere(COUNTRY_NAME_OBJECT, data, where).then(value => {
+            const _ids = ids.map(i => new ObjectId(i))
+            await Database.updateByWhere(COUNTRY_NAME_OBJECT, data, { _id: { $in: _ids }}).then(value => {
                 resolve(true)
             })
             reject(false)
         })
     }
 
-    open(idOpen: string): Promise<Country | null> {
+    updateById(data: object, id: string): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            await Database.updateByWhere(COUNTRY_NAME_OBJECT, data, { _id: (new ObjectId(id)) }).then(value => {
+                resolve(true)
+            })
+            reject(false)
+        })
+    }
+
+    openById(idOpen: string): Promise<Country | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(COUNTRY_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new Country(), value) : null)
@@ -74,9 +89,9 @@ export default class CountryDAO implements CountryRepository, CrudRepository<Cou
         })
     }
 
-    create(nameValue: string, userRegister: string, reviewedValue: boolean, createdAtValue: string, updatedAtValue?: string): Promise<string> {
+    create(nameValue: string, userRegister: string, reviewedValue: boolean, createdAtValue: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = CountrySetObjectDB(nameValue, (new ObjectId(userRegister)), reviewedValue, true, createdAtValue, updatedAtValue)
+            const objectDb = CountrySetObjectDB(nameValue, (new ObjectId(userRegister)), reviewedValue, true, createdAtValue)
             await Database.insert(COUNTRY_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })

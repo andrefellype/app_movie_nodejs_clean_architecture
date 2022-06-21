@@ -4,7 +4,7 @@ export const TV_SHOW_NAME_OBJECT = "tv_shows"
 
 export function TvShowSetObjectDB(
     titleValue: string, releaseValue: string, resume: string, categoriesIdValue: string[], countriesIdValue: string[], streamsIdValue: string[],
-    userRegister: object | null, reviewedValue: boolean, statusValue: boolean, createdAtValue: string, updatedAtValue: string | null = null) {
+    userRegister: object | null, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
     return {
         title: titleValue,
         release: releaseValue,
@@ -16,7 +16,7 @@ export function TvShowSetObjectDB(
         reviewed: reviewedValue,
         status: statusValue,
         created_at: createdAtValue,
-        updated_at: updatedAtValue
+        updated_at: null
     }
 }
 

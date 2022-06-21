@@ -14,10 +14,10 @@ class MovieRouter {
         this.getAll()
         this.create()
         this.openById()
-        this.update()
-        this.approved()
-        this.delete()
-        this.deleteSeveral()
+        this.updateById()
+        this.updateApprovedById()
+        this.deleteById()
+        this.deleteSeveralByIds()
         this.getAllByNotMyMovie()
     }
 
@@ -25,26 +25,26 @@ class MovieRouter {
         return this.routes.post('/movie/open/all/notmymovie', this.verifyJWT, MovieController.getAllByNotMyMovie)
     }
 
-    private deleteSeveral() {
-        return this.routes.post('/movie/delete/several', body('_ids').notEmpty(), this.verifyJWT, MovieController.deleteSeveral)
+    private deleteSeveralByIds() {
+        return this.routes.post('/movie/delete/several', body('_ids').notEmpty(), this.verifyJWT, MovieController.deleteSeveralByIds)
     }
 
-    private delete() {
-        return this.routes.post('/movie/delete', body('movieId').notEmpty(), this.verifyJWT, MovieController.delete)
+    private deleteById() {
+        return this.routes.post('/movie/delete', body('movieId').notEmpty(), this.verifyJWT, MovieController.deleteById)
     }
 
-    private approved() {
-        return this.routes.post('/movie/approved/reviewed', body('movieId').notEmpty(), this.verifyJWT, MovieController.approved)
+    private updateApprovedById() {
+        return this.routes.post('/movie/approved/reviewed', body('movieId').notEmpty(), this.verifyJWT, MovieController.updateApprovedById)
     }
 
-    private update() {
+    private updateById() {
         const movieDAO = new MovieDAO()
-        return this.routes.post('/movie/update', body('movieId').notEmpty(), body('title').notEmpty().withMessage("Título obrigatório")
+        return this.routes.post('/movie/update', body('movieId').notEmpty(), body('title').notEmpty().withMessage("Título obrigatório.")
             .custom(async (value, { req }) => {
                 return new Promise((resolve, reject) => {
                     movieDAO.openByTitle(value).then((valueJson) => {
                         if (valueJson != null && valueJson._id != req.body.movieId) {
-                            DataReturnResponse.returnReject(reject, new Error('Título já existente'))
+                            DataReturnResponse.returnReject(reject, new Error('Título já existente.'))
                         } else {
                             DataReturnResponse.returnResolve(resolve, true)
                         }
@@ -54,8 +54,8 @@ class MovieRouter {
                 }).catch(err => {
                     throw new Error(err.message)
                 })
-            }), body('release').notEmpty().withMessage("Lançamento obrigatório"),
-            body('duration').notEmpty().withMessage("Duração obrigatória").custom(async (value, { req }) => {
+            }), body('release').notEmpty().withMessage("Lançamento obrigatório."),
+            body('duration').notEmpty().withMessage("Duração obrigatória.").custom(async (value, { req }) => {
                 return new Promise((resolve, reject) => {
                     let hourStr = ""
                     let minuteStr = ""
@@ -67,14 +67,14 @@ class MovieRouter {
                         }
                     }
                     if ((parseInt(minuteStr) < 0 || parseInt(minuteStr) > 59) || `${hourStr}:${minuteStr}`.length != 5) {
-                        DataReturnResponse.returnReject(reject, new Error('Duração inválida'))
+                        DataReturnResponse.returnReject(reject, new Error("Duração inválida."))
                     } else {
                         DataReturnResponse.returnResolve(resolve, true)
                     }
                 }).catch(err => {
                     throw new Error(err.message)
                 })
-            }), body('movieTheater').notEmpty().withMessage("Cinema obrigatório"), this.verifyJWT, MovieController.update)
+            }), body('movieTheater').notEmpty().withMessage("Cinema obrigatório."), this.verifyJWT, MovieController.updateById)
     }
 
     private openById() {
@@ -83,12 +83,12 @@ class MovieRouter {
 
     private create() {
         const movieDAO = new MovieDAO()
-        return this.routes.post('/movie/register', body('title').notEmpty().withMessage("Título obrigatório")
+        return this.routes.post('/movie/register', body('title').notEmpty().withMessage("Título obrigatório.")
             .custom(async (value) => {
                 return new Promise((resolve, reject) => {
                     movieDAO.openByTitle(value).then((valueJson) => {
                         if (valueJson != null) {
-                            DataReturnResponse.returnReject(reject, new Error('Título já existente'))
+                            DataReturnResponse.returnReject(reject, new Error('Título já existente.'))
                         } else {
                             DataReturnResponse.returnResolve(resolve, true)
                         }
@@ -98,8 +98,8 @@ class MovieRouter {
                 }).catch(err => {
                     throw new Error(err.message)
                 })
-            }), body('release').notEmpty().withMessage("Lançamento obrigatório"),
-            body('duration').notEmpty().withMessage("Duração obrigatória").custom(async (value, { req }) => {
+            }), body('release').notEmpty().withMessage("Lançamento obrigatório."),
+            body('duration').notEmpty().withMessage("Duração obrigatória.").custom(async (value, { req }) => {
                 return new Promise((resolve, reject) => {
                     let hourStr = ""
                     let minuteStr = ""
@@ -111,14 +111,14 @@ class MovieRouter {
                         }
                     }
                     if ((parseInt(minuteStr) < 0 || parseInt(minuteStr) > 59) || `${hourStr}:${minuteStr}`.length != 5) {
-                        DataReturnResponse.returnReject(reject, new Error('Duração inválida'))
+                        DataReturnResponse.returnReject(reject, new Error("Duração inválida."))
                     } else {
                         DataReturnResponse.returnResolve(resolve, true)
                     }
                 }).catch(err => {
                     throw new Error(err.message)
                 })
-            }), body('movieTheater').notEmpty().withMessage("Cinema obrigatório"), this.verifyJWT, MovieController.create)
+            }), body('movieTheater').notEmpty().withMessage("Cinema obrigatório."), this.verifyJWT, MovieController.create)
     }
 
     private getAll() {

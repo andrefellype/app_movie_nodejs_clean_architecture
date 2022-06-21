@@ -1,4 +1,4 @@
-export default class AboutApp {
+export default class AboutUs {
     public readonly _id: string
     public readonly app: string
     public readonly web: string

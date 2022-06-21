@@ -2,14 +2,14 @@ import MyTvShow from "./MyTvShowEpisode"
 
 export const MY_TV_SHOW_EPISODES_NAME_OBJECT = "my_tv_show_episodes"
 
-export function MyTvShowEpisodeSetObjectDB(userId: object, tvShowIdValue: object, seasonIdValue: object, episodeIdValue: object, createdAtValue: string, updatedAtValue: string | null = null) {
+export function MyTvShowEpisodeSetObjectDB(userId: object, tvShowIdValue: object, seasonIdValue: object, episodeIdValue: object, createdAtValue: string) {
     return {
         user_id: userId,
         tv_show_id: tvShowIdValue,
         tv_show_season_id: seasonIdValue,
         tv_show_episode_id: episodeIdValue,
         created_at: createdAtValue,
-        updated_at: updatedAtValue
+        updated_at: null
     }
 }
 

@@ -12,19 +12,19 @@ class MyMovieRouter {
         this.getAll()
         this.create()
         this.createNeverWatch()
-        this.delete()
+        this.deleteById()
     }
 
-    private delete() {
-        return this.routes.post('/mymovie/delete', body('movieId').notEmpty(), this.verifyJWT, MyMovieController.delete)
+    private deleteById() {
+        return this.routes.post('/mymovie/delete', body('movieId').notEmpty(), this.verifyJWT, MyMovieController.deleteById)
     }
 
     private createNeverWatch() {
-        return this.routes.post('/mymovie/register/notwatch', body('movieId').notEmpty().withMessage("Filme obrigatório"), this.verifyJWT, MyMovieController.createNeverWatch)
+        return this.routes.post('/mymovie/register/notwatch', body('movieId').notEmpty().withMessage("Filme obrigatório."), this.verifyJWT, MyMovieController.createNeverWatch)
     }
 
     private create() {
-        return this.routes.post('/mymovie/register', body('movieId').notEmpty().withMessage("Filme obrigatório"), this.verifyJWT, MyMovieController.create)
+        return this.routes.post('/mymovie/register', body('movieId').notEmpty().withMessage("Filme obrigatório."), this.verifyJWT, MyMovieController.create)
     }
 
     private getAll() {

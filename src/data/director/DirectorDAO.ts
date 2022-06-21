@@ -6,9 +6,10 @@ import { DirectorSetObjectDB, DIRECTOR_NAME_OBJECT } from "../../domain/entity/d
 import Director from "../../domain/entity/director/Director"
 
 export default class DirectorDAO implements DirectorRepository, CrudRepository<Director> {
-    deleteAll(where: object): Promise<boolean> {
+    deleteAllByIds(ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.deleteByWhere(DIRECTOR_NAME_OBJECT, where).then(value => {
+            const _ids = ids.map(i => new ObjectId(i))
+            await Database.deleteByWhere(DIRECTOR_NAME_OBJECT, { _id: { $in: _ids }}).then(value => {
                 resolve(true)
             })
             reject(null)
@@ -47,7 +48,7 @@ export default class DirectorDAO implements DirectorRepository, CrudRepository<D
         })
     }
 
-    delete(idDelete: string): Promise<boolean> {
+    deleteById(idDelete: string): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             await Database.deleteByWhere(DIRECTOR_NAME_OBJECT, { _id: new ObjectId(idDelete) }).then(value => {
                 resolve(true)
@@ -55,17 +56,31 @@ export default class DirectorDAO implements DirectorRepository, CrudRepository<D
             reject(null)
         })
     }
-
+    
     updateByWhere(data: object, where: object): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+
+    updateByIds(data: object, ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.updateByWhere(DIRECTOR_NAME_OBJECT, data, where).then(value => {
+            const _ids = ids.map(i => new ObjectId(i))
+            await Database.updateByWhere(DIRECTOR_NAME_OBJECT, data, { _id: { $in: _ids }}).then(value => {
                 resolve(true)
             })
             reject(false)
         })
     }
 
-    open(idOpen: string): Promise<Director | null> {
+    updateById(data: object, id: string): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            await Database.updateByWhere(DIRECTOR_NAME_OBJECT, data, { _id: (new ObjectId(id)) }).then(value => {
+                resolve(true)
+            })
+            reject(false)
+        })
+    }
+
+    openById(idOpen: string): Promise<Director | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(DIRECTOR_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new Director(), value) : null)
@@ -74,9 +89,9 @@ export default class DirectorDAO implements DirectorRepository, CrudRepository<D
         })
     }
 
-    create(nameValue: string, userRegister: string, reviewedValue: boolean, createdAtValue: string, updatedAtValue?: string): Promise<string> {
+    create(nameValue: string, userRegister: string, reviewedValue: boolean, createdAtValue: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = DirectorSetObjectDB(nameValue, (new ObjectId(userRegister)), reviewedValue, true, createdAtValue, updatedAtValue)
+            const objectDb = DirectorSetObjectDB(nameValue, (new ObjectId(userRegister)), reviewedValue, true, createdAtValue)
             await Database.insert(DIRECTOR_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })

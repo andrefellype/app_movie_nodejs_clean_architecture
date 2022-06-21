@@ -14,32 +14,32 @@ class DirectorRouter {
         this.getAll()
         this.create()
         this.openById()
-        this.update()
-        this.approved()
-        this.delete()
-        this.deleteSeveral()
+        this.updateById()
+        this.updateApprovedById()
+        this.deleteById()
+        this.deleteSeveralByIds()
     }
 
-    private deleteSeveral() {
-        return this.routes.post('/director/delete/several', body('_ids').notEmpty(), this.verifyJWT, DirectorController.deleteSeveral)
+    private deleteSeveralByIds() {
+        return this.routes.post('/director/delete/several', body('_ids').notEmpty(), this.verifyJWT, DirectorController.deleteSeveralByIds)
     }
 
-    private delete() {
-        return this.routes.post('/director/delete', body('directorId').notEmpty(), this.verifyJWT, DirectorController.delete)
+    private deleteById() {
+        return this.routes.post('/director/delete', body('directorId').notEmpty(), this.verifyJWT, DirectorController.deleteById)
     }
 
-    private approved() {
-        return this.routes.post('/director/approved/reviewed', body('directorId').notEmpty(), this.verifyJWT, DirectorController.approved)
+    private updateApprovedById() {
+        return this.routes.post('/director/approved/reviewed', body('directorId').notEmpty(), this.verifyJWT, DirectorController.updateApprovedById)
     }
 
-    private update() {
+    private updateById() {
         const directorDAO = new DirectorDAO()
-        return this.routes.post('/director/update', body('directorId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório").custom(async (value, { req }) => {
+        return this.routes.post('/director/update', body('directorId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.").custom(async (value, { req }) => {
             return new Promise((resolve, reject) => {
                 if (req.body.directorId != null && req.body.directorId.length > 0) {
                     directorDAO.openByName(value).then((valueJson) => {
                         if (valueJson != null && valueJson._id != req.body.directorId) {
-                            DataReturnResponse.returnReject(reject, new Error('Nome já existente'))
+                            DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
                         } else {
                             DataReturnResponse.returnResolve(resolve, true)
                         }
@@ -52,7 +52,7 @@ class DirectorRouter {
             }).catch(err => {
                 throw new Error(err.message)
             })
-        }), this.verifyJWT, DirectorController.update)
+        }), this.verifyJWT, DirectorController.updateById)
     }
 
     private openById() {
@@ -61,12 +61,12 @@ class DirectorRouter {
 
     private create() {
         const directorDAO = new DirectorDAO()
-        return this.routes.post('/director/register', body('reviewed').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório")
+        return this.routes.post('/director/register', body('reviewed').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.")
             .custom(async (value) => {
                 return new Promise((resolve, reject) => {
                     directorDAO.openByName(value).then((valueJson) => {
                         if (valueJson != null) {
-                            DataReturnResponse.returnReject(reject, new Error('Nome já existente'))
+                            DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
                         } else {
                             DataReturnResponse.returnResolve(resolve, true)
                         }

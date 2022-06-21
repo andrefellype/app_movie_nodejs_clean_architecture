@@ -15,16 +15,37 @@ export default class MyTvShowEpisodeDAO implements MyTvShowEpisodeRepository, Cr
         })
     }
 
-    deleteAll(where: object): Promise<boolean> {
+    deleteAllByTvShowIds(tvShowIds: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.deleteByWhere(MY_TV_SHOW_EPISODES_NAME_OBJECT, where).then(value => {
+            const _ids = tvShowIds.map(i => new ObjectId(i))
+            await Database.deleteByWhere(MY_TV_SHOW_EPISODES_NAME_OBJECT, { tv_show_id: { $in: _ids } }).then(value => {
                 resolve(true)
             })
             reject(null)
         })
     }
 
-    deleteByTvShowIdAndUserId(tvShowId: string, userId: string): Promise<boolean> {
+    deleteAllByTvShowSeasonsIds(idSeasons: string[]): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            const _ids = idSeasons.map(i => new ObjectId(i))
+            await Database.deleteByWhere(MY_TV_SHOW_EPISODES_NAME_OBJECT, { tv_show_season_id: { $in: _ids } }).then(value => {
+                resolve(true)
+            })
+            reject(null)
+        })
+    }
+
+    deleteAllByTvShowEpisodeIds(idEpisodes: string[]): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            const _ids = idEpisodes.map(i => new ObjectId(i))
+            await Database.deleteByWhere(MY_TV_SHOW_EPISODES_NAME_OBJECT, { tv_show_episode_id: { $in: _ids } }).then(value => {
+                resolve(true)
+            })
+            reject(null)
+        })
+    }
+
+    deleteByTvShowIdAndUserIds(tvShowId: string, userId: string): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             await Database.deleteByWhere(MY_TV_SHOW_EPISODES_NAME_OBJECT, { tv_show_id: new ObjectId(tvShowId), user_id: new ObjectId(userId) }).then(value => {
                 resolve(true)
@@ -61,20 +82,27 @@ export default class MyTvShowEpisodeDAO implements MyTvShowEpisodeRepository, Cr
             reject([])
         })
     }
-
-    delete(idDelete: string): Promise<boolean> {
+    
+    deleteById(idDelete: string): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
     updateByWhere(data: object, where: object): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
-    open(idOpen: string): Promise<MyTvShowEpisode> {
+    updateByIds(data: object, ids: string[]): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+    updateById(data: object, id: string): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
 
-    create(userId: string, tvShowId: string, tvShowSeasonId: string, tvShowEpisodeId: string, createdAtValue: string, updatedAtValue?: string): Promise<string> {
+    openById(idOpen: string): Promise<MyTvShowEpisode> {
+        throw new Error("Method not implemented.")
+    }
+
+    create(userId: string, tvShowId: string, tvShowSeasonId: string, tvShowEpisodeId: string, createdAtValue: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = MyTvShowEpisodeSetObjectDB(new ObjectId(userId), new ObjectId(tvShowId), (new ObjectId(tvShowSeasonId)), (new ObjectId(tvShowEpisodeId)), createdAtValue, updatedAtValue)
+            const objectDb = MyTvShowEpisodeSetObjectDB(new ObjectId(userId), new ObjectId(tvShowId), (new ObjectId(tvShowSeasonId)), (new ObjectId(tvShowEpisodeId)), createdAtValue)
             await Database.insert(MY_TV_SHOW_EPISODES_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })

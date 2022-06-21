@@ -6,9 +6,20 @@ import { MY_TV_SHOW_SEASON_NEVER_WATCHS_NAME_OBJECT, MyTvShowSeasonNeverWatchSet
 import MyTvShowSeasonNeverWatchRepository from "../../domain/repository/myTvShowSeasonNeverWatch/MyTvShowSeasonNeverWatchRepository"
 
 export default class MyTvShowSeasonNeverWatchDAO implements MyTvShowSeasonNeverWatchRepository, CrudRepository<MyTvShowSeasonNeverWatch> {
-    deleteAll(where: object): Promise<boolean> {
+    deleteAllByTvShowIds(tvShowIds: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.deleteByWhere(MY_TV_SHOW_SEASON_NEVER_WATCHS_NAME_OBJECT, where).then(value => {
+            const _ids = tvShowIds.map(i => new ObjectId(i))
+            await Database.deleteByWhere(MY_TV_SHOW_SEASON_NEVER_WATCHS_NAME_OBJECT, { tv_show_id: { $in: _ids } }).then(value => {
+                resolve(true)
+            })
+            reject(null)
+        })
+    }
+    
+    deleteAllByTvShowSeasonIds(idSeasons: string[]): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            const _ids = idSeasons.map(i => new ObjectId(i))
+            await Database.deleteByWhere(MY_TV_SHOW_SEASON_NEVER_WATCHS_NAME_OBJECT, { tv_show_season_id: { $in: _ids } }).then(value => {
                 resolve(true)
             })
             reject(null)
@@ -23,20 +34,27 @@ export default class MyTvShowSeasonNeverWatchDAO implements MyTvShowSeasonNeverW
             reject([])
         })
     }
-
-    delete(idDelete: string): Promise<boolean> {
+    
+    deleteById(idDelete: string): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
     updateByWhere(data: object, where: object): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
-    open(idOpen: string): Promise<MyTvShowSeasonNeverWatch> {
+    updateByIds(data: object, ids: string[]): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+    updateById(data: object, id: string): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+    
+    openById(idOpen: string): Promise<MyTvShowSeasonNeverWatch> {
         throw new Error("Method not implemented.")
     }
 
-    create(userId: string, seasonId: string, tvShowId: string, createdAtValue: string, updatedAtValue?: string): Promise<string> {
+    create(userId: string, seasonId: string, tvShowId: string, createdAtValue: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = MyTvShowSeasonNeverWatchSetObjectDB(new ObjectId(userId), (new ObjectId(seasonId)), new ObjectId(tvShowId), createdAtValue, updatedAtValue)
+            const objectDb = MyTvShowSeasonNeverWatchSetObjectDB(new ObjectId(userId), (new ObjectId(seasonId)), new ObjectId(tvShowId), createdAtValue)
             await Database.insert(MY_TV_SHOW_SEASON_NEVER_WATCHS_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })

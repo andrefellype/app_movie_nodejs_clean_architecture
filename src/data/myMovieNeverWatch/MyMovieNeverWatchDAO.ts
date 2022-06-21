@@ -6,9 +6,10 @@ import { MyMovieNeverWatchSetObjectDB, MY_MOVIE_NEVER_WATCHS_NAME_OBJECT } from 
 import MyMovieNeverWatchRepository from "../../domain/repository/myMovieNeverWatch/MyMovieNeverWatchRepository"
 
 export default class MyMovieNeverWatchDAO implements MyMovieNeverWatchRepository, CrudRepository<MyMovieNeverWatch> {
-    deleteAll(where: object): Promise<boolean> {
+    deleteAllByMovieIds(idMovies: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.deleteByWhere(MY_MOVIE_NEVER_WATCHS_NAME_OBJECT, where).then(value => {
+            const _ids = idMovies.map(i => new ObjectId(i))
+            await Database.deleteByWhere(MY_MOVIE_NEVER_WATCHS_NAME_OBJECT, { movie_id: { $in: _ids } }).then(value => {
                 resolve(true)
             })
             reject(null)
@@ -24,19 +25,25 @@ export default class MyMovieNeverWatchDAO implements MyMovieNeverWatchRepository
         })
     }
 
-    delete(idDelete: string): Promise<boolean> {
+    deleteById(idDelete: string): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
     updateByWhere(data: object, where: object): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
-    open(idOpen: string): Promise<MyMovieNeverWatch> {
+    updateByIds(data: object, ids: string[]): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+    updateById(data: object, id: string): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+    openById(idOpen: string): Promise<MyMovieNeverWatch> {
         throw new Error("Method not implemented.")
     }
 
-    create(userId: string, movieId: string, createdAtValue: string, updatedAtValue?: string): Promise<string> {
+    create(userId: string, movieId: string, createdAtValue: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = MyMovieNeverWatchSetObjectDB(new ObjectId(userId), new ObjectId(movieId), createdAtValue, updatedAtValue)
+            const objectDb = MyMovieNeverWatchSetObjectDB(new ObjectId(userId), new ObjectId(movieId), createdAtValue)
             await Database.insert(MY_MOVIE_NEVER_WATCHS_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })

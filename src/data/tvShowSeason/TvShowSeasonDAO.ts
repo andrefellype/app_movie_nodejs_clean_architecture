@@ -18,9 +18,9 @@ export default class TvShowSeasonDAO implements TvShowSeasonRepository, CrudRepo
         })
     }
 
-    getAllByTvShowId(tvShowIds: object[]): Promise<TvShowSeason[]> {
+    getAllByTvShowIds(tvShowIds: string[]): Promise<TvShowSeason[]> {
         return new Promise(async (resolve, reject) => {
-            const _ids = tvShowIds
+            const _ids = tvShowIds.map(i => new ObjectId(i))
             await Database.allByWhere(TV_SHOW_SEASON_NAME_OBJECT, { tv_show_id: { $in: _ids } }).then(valueJson => {
                 if (valueJson !== null) {
                     resolve((valueJson as []).map(value => Object.assign(new TvShowSeason(), value)))
@@ -30,9 +30,10 @@ export default class TvShowSeasonDAO implements TvShowSeasonRepository, CrudRepo
         })
     }
 
-    deleteAll(where: object): Promise<boolean> {
+    deleteAllByIds(ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.deleteByWhere(TV_SHOW_SEASON_NAME_OBJECT, where).then(value => {
+            const _ids = ids.map(i => new ObjectId(i))
+            await Database.deleteByWhere(TV_SHOW_SEASON_NAME_OBJECT, { _id: { $in: _ids } }).then(value => {
                 resolve(true)
             })
             reject(null)
@@ -71,7 +72,7 @@ export default class TvShowSeasonDAO implements TvShowSeasonRepository, CrudRepo
         })
     }
 
-    delete(idDelete: string): Promise<boolean> {
+    deleteById(idDelete: string): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             await Database.deleteByWhere(TV_SHOW_SEASON_NAME_OBJECT, { _id: new ObjectId(idDelete) }).then(value => {
                 resolve(true)
@@ -81,15 +82,29 @@ export default class TvShowSeasonDAO implements TvShowSeasonRepository, CrudRepo
     }
 
     updateByWhere(data: object, where: object): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+
+    updateByIds(data: object, ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.updateByWhere(TV_SHOW_SEASON_NAME_OBJECT, data, where).then(value => {
+            const _ids = ids.map(i => new ObjectId(i))
+            await Database.updateByWhere(TV_SHOW_SEASON_NAME_OBJECT, data, { _id: { $in: _ids } }).then(value => {
                 resolve(true)
             })
             reject(false)
         })
     }
 
-    open(idOpen: string): Promise<TvShowSeason | null> {
+    updateById(data: object, id: string): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            await Database.updateByWhere(TV_SHOW_SEASON_NAME_OBJECT, data, { _id: (new ObjectId(id)) }).then(value => {
+                resolve(true)
+            })
+            reject(false)
+        })
+    }
+
+    openById(idOpen: string): Promise<TvShowSeason | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(TV_SHOW_SEASON_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new TvShowSeason(), value) : null)
@@ -98,9 +113,9 @@ export default class TvShowSeasonDAO implements TvShowSeasonRepository, CrudRepo
         })
     }
 
-    create(nameValue: string, tvShowId: string, userRegister: string | null, reviewedValue: boolean, createdAtValue: string, updatedAtValue?: string): Promise<string> {
+    create(nameValue: string, tvShowId: string, userRegister: string | null, reviewedValue: boolean, createdAtValue: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = TvShowSeasonSetObjectDB(nameValue, (new ObjectId(tvShowId)), (userRegister != null ? new ObjectId(userRegister) : null), reviewedValue, true, createdAtValue, updatedAtValue)
+            const objectDb = TvShowSeasonSetObjectDB(nameValue, (new ObjectId(tvShowId)), (userRegister != null ? new ObjectId(userRegister) : null), reviewedValue, true, createdAtValue)
             await Database.insert(TV_SHOW_SEASON_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })

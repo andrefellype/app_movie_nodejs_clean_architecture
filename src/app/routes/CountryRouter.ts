@@ -14,32 +14,32 @@ class CountryRouter {
         this.getAll()
         this.create()
         this.openById()
-        this.update()
-        this.approved()
-        this.delete()
-        this.deleteSeveral()
+        this.updateById()
+        this.updateApprovedById()
+        this.deleteById()
+        this.deleteSeveralByIds()
     }
 
-    private deleteSeveral() {
-        return this.routes.post('/country/delete/several', body('_ids').notEmpty(), this.verifyJWT, CountryController.deleteSeveral)
+    private deleteSeveralByIds() {
+        return this.routes.post('/country/delete/several', body('_ids').notEmpty(), this.verifyJWT, CountryController.deleteSeveralByIds)
     }
 
-    private delete() {
-        return this.routes.post('/country/delete', body('countryId').notEmpty(), this.verifyJWT, CountryController.delete)
+    private deleteById() {
+        return this.routes.post('/country/delete', body('countryId').notEmpty(), this.verifyJWT, CountryController.deleteById)
     }
 
-    private approved() {
-        return this.routes.post('/country/approved/reviewed', body('countryId').notEmpty(), this.verifyJWT, CountryController.approved)
+    private updateApprovedById() {
+        return this.routes.post('/country/approved/reviewed', body('countryId').notEmpty(), this.verifyJWT, CountryController.updateApprovedById)
     }
 
-    private update() {
+    private updateById() {
         const countryDAO = new CountryDAO()
-        return this.routes.post('/country/update', body('countryId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório").custom(async (value, { req }) => {
+        return this.routes.post('/country/update', body('countryId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.").custom(async (value, { req }) => {
             return new Promise((resolve, reject) => {
                 if (req.body.countryId != null && req.body.countryId.length > 0) {
                     countryDAO.openByName(value).then((valueJson) => {
                         if (valueJson != null && valueJson._id != req.body.countryId) {
-                            DataReturnResponse.returnReject(reject, new Error('Nome já existente'))
+                            DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
                         } else {
                             DataReturnResponse.returnResolve(resolve, true)
                         }
@@ -52,7 +52,7 @@ class CountryRouter {
             }).catch(err => {
                 throw new Error(err.message)
             })
-        }), this.verifyJWT, CountryController.update)
+        }), this.verifyJWT, CountryController.updateById)
     }
 
     private openById() {
@@ -61,12 +61,12 @@ class CountryRouter {
 
     private create() {
         const countryDAO = new CountryDAO()
-        return this.routes.post('/country/register', body('reviewed').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório")
+        return this.routes.post('/country/register', body('reviewed').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.")
             .custom(async (value) => {
                 return new Promise((resolve, reject) => {
                     countryDAO.openByName(value).then((valueJson) => {
                         if (valueJson != null) {
-                            DataReturnResponse.returnReject(reject, new Error('Nome já existente'))
+                            DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
                         } else {
                             DataReturnResponse.returnResolve(resolve, true)
                         }

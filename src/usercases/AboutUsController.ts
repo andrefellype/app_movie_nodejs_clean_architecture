@@ -3,26 +3,26 @@ import { validationResult } from 'express-validator'
 import ConvertData from '../app/core/ConvertData'
 import DataJsonResponse from '../app/core/DataJsonResponse'
 import DataReturnResponse from '../app/core/DataReturnResponse'
-import AboutAppDAO from '../data/aboutApp/AboutAppDAO'
+import AboutUsDAO from '../data/aboutUs/AboutUsDAO'
 
-class AppController {
-    public deleteAboutUs(req: Request, res: Response): Promise<string> {
+class AboutUsController {
+    public delete(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
-            const aboutAppDAO = new AboutAppDAO()
-            aboutAppDAO.deleteAll().then(valueDelete => {
+            const aboutUsDAO = new AboutUsDAO()
+            aboutUsDAO.deleteAll().then(valueDelete => {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }).catch(err => console.log(err))
         })
     }
 
-    public updateAboutUs(req: Request, res: Response): Promise<string> {
+    public update(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                const aboutAppDAO = new AboutAppDAO()
-                aboutAppDAO.update({ app: req.body.app, web: req.body.web, updated_at: ConvertData.getDateNowStr() })
+                const aboutUsDAO = new AboutUsDAO()
+                aboutUsDAO.update({ app: req.body.app, web: req.body.web, updated_at: ConvertData.getDateNowStr() })
                     .then(valueUpdate => {
                         DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                     }).catch(err => console.log(err))
@@ -30,29 +30,29 @@ class AppController {
         })
     }
 
-    public createAboutUs(req: Request, res: Response): Promise<string> {
+    public create(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                const aboutAppDAO = new AboutAppDAO()
-                aboutAppDAO.create(req.body.app, req.body.web).then(value => {
+                const aboutUsDAO = new AboutUsDAO()
+                aboutUsDAO.create(req.body.app, req.body.web).then(value => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, value))
                 }).catch(err => console.log(err))
             }
         })
     }
 
-    public showAboutUs(req: Request, res: Response): Promise<string> {
+    public open(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
-            const aboutAppDAO = new AboutAppDAO()
-            aboutAppDAO.openLast().then(async value => {
-                const aboutApp = value != null ? value : null
-                DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, aboutApp))
+            const aboutUsDAO = new AboutUsDAO()
+            aboutUsDAO.openLast().then(async value => {
+                const aboutUs = value != null ? value : null
+                DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, aboutUs))
             }).catch(err => console.log(err))
         })
     }
 }
 
-export default new AppController()
+export default new AboutUsController()

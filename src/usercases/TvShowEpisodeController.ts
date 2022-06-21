@@ -12,33 +12,33 @@ import MyTvShowController from './MyTvShowController'
 import TvShowSeasonDAO from '../data/tvShowSeason/TvShowSeasonDAO'
 
 class TvShowEpisodeController {
-    public async deleteEpisodeAllByTvShowId(tvShowIds: object[]) {
+    public async deleteEpisodeAllByTvShowId(tvShowIds: string[]) {
         const tvShowSeasonDAO = new TvShowSeasonDAO()
         const tvShowEpisodeDAO = new TvShowEpisodeDAO()
-        await tvShowSeasonDAO.getAllByTvShowId(tvShowIds).then(async seasonsJson => {
-            const tvShowSeasonIds = seasonsJson.map(s => (new ObjectId(s._id)))
+        await tvShowSeasonDAO.getAllByTvShowIds(tvShowIds).then(async seasonsJson => {
+            const tvShowSeasonIds = seasonsJson.map(s => s._id)
             await tvShowEpisodeDAO.getAllByTvShowSeasonIds(tvShowSeasonIds).then(async valueJson => {
-                const idsDelete: object[] = []
+                const idsDelete: string[] = []
                 for (let v = 0; v < valueJson.length; v++) {
-                    idsDelete.push((new ObjectId(valueJson[v]._id)))
+                    idsDelete.push(valueJson[v]._id)
                 }
                 await MyTvShowController.deleteMyTvShowEpisodeAllByTvShowEpisodeId(idsDelete)
-                await tvShowEpisodeDAO.deleteAll({ _id: { $in: idsDelete } })
+                await tvShowEpisodeDAO.deleteAllByIds(idsDelete)
             })
         })
     }
 
-    public async deleteEpisodeAllByTvSeasonId(tvShowSeasonIds: object[]) {
+    public async deleteEpisodeAllByTvSeasonId(tvShowSeasonIds: string[]) {
         const tvShowEpisodeDAO = new TvShowEpisodeDAO()
         await tvShowEpisodeDAO.getAllByTvShowSeasonIds(tvShowSeasonIds).then(async valueJson => {
-            const idsDelete: object[] = []
+            const idsDelete: string[] = []
             for (let v = 0; v < valueJson.length; v++) {
-                idsDelete.push((new ObjectId(valueJson[v]._id)))
+                idsDelete.push(valueJson[v]._id)
             }
             await MyTvShowController.deleteMyTvShowEpisodeAllByTvShowEpisodeId(idsDelete)
         })
         const _ids = tvShowSeasonIds
-        await tvShowEpisodeDAO.deleteAll({ tv_show_season_id: { $in: _ids } })
+        await tvShowEpisodeDAO.deleteAllByIds(_ids)
     }
 
     public getAllByNotMyTvShow(req: Request, res: Response): Promise<string> {
@@ -78,70 +78,69 @@ class TvShowEpisodeController {
         })
     }
 
-    private static async deleteEpisode(tvShowEpisodeIds: string[], tvShowEpisodeDAO: TvShowEpisodeDAO) {
+    private static async deleteEpisodeByIds(tvShowEpisodeIds: string[], tvShowEpisodeDAO: TvShowEpisodeDAO) {
         await tvShowEpisodeDAO.getAllByIds(tvShowEpisodeIds).then(async valueJson => {
-            const idsDelete: object[] = []
-            const idsUpdate: object[] = []
+            const idsDelete: string[] = []
+            const idsUpdate: string[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 if (!valueJson[v].reviewed) {
-                    idsDelete.push((new ObjectId(valueJson[v]._id)))
+                    idsDelete.push(valueJson[v]._id)
                 } else {
-                    idsUpdate.push((new ObjectId(valueJson[v]._id)))
+                    idsUpdate.push(valueJson[v]._id)
                 }
             }
             await MyTvShowController.deleteMyTvShowEpisodeAllByTvShowEpisodeId(idsDelete)
-            await tvShowEpisodeDAO.deleteAll({ _id: { $in: idsDelete } })
-            await tvShowEpisodeDAO.updateByWhere({ status: false, "updated_at": ConvertData.getDateNowStr() }, { _id: { $in: idsUpdate } })
+            await tvShowEpisodeDAO.deleteAllByIds(idsDelete)
+            await tvShowEpisodeDAO.updateByIds({ status: false, "updated_at": ConvertData.getDateNowStr() }, idsUpdate)
         })
     }
 
-    public deleteSeveral(req: Request, res: Response): Promise<string> {
+    public deleteSeveralByIds(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                const ids = JSON.parse(req.body._ids)
-                await TvShowEpisodeController.deleteEpisode(ids, (new TvShowEpisodeDAO()))
+                await TvShowEpisodeController.deleteEpisodeByIds(JSON.parse(req.body._ids), (new TvShowEpisodeDAO()))
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }
         })
     }
 
-    public delete(req: Request, res: Response): Promise<string> {
+    public deleteById(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                await TvShowEpisodeController.deleteEpisode([req.body.tvShowEpisodeId], (new TvShowEpisodeDAO()))
+                await TvShowEpisodeController.deleteEpisodeByIds([req.body.tvShowEpisodeId], (new TvShowEpisodeDAO()))
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }
         })
     }
 
-    public approved(req: Request, res: Response): Promise<string> {
+    public updateApprovedById(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const tvShowEpisodeDAO = new TvShowEpisodeDAO()
-                tvShowEpisodeDAO.updateByWhere({ reviewed: true, updated_at: ConvertData.getDateNowStr() }, { _id: new ObjectId(req.body.tvShowEpisodeId) }).then(valueUpdate => {
+                tvShowEpisodeDAO.updateById({ reviewed: true, updated_at: ConvertData.getDateNowStr() }, req.body.tvShowEpisodeId).then(valueUpdate => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                 })
             }
         })
     }
 
-    public update(req: Request, res: Response): Promise<string> {
+    public updateById(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const tvShowEpisodeDAO = new TvShowEpisodeDAO()
-                tvShowEpisodeDAO.updateByWhere({ name: req.body.name, updated_at: ConvertData.getDateNowStr() }, { _id: new ObjectId(req.body.tvShowEpisodeId) }).then(valueUpdate => {
+                tvShowEpisodeDAO.updateById({ name: req.body.name, updated_at: ConvertData.getDateNowStr() }, req.body.tvShowEpisodeId).then(valueUpdate => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                 })
             }
@@ -155,7 +154,7 @@ class TvShowEpisodeController {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const tvShowEpisodeDAO = new TvShowEpisodeDAO()
-                tvShowEpisodeDAO.open(req.body.tvShowEpisodeId).then(async valueJson => {
+                tvShowEpisodeDAO.openById(req.body.tvShowEpisodeId).then(async valueJson => {
                     const episode = TvShowEpisodeGetObjectForJson(valueJson!!, req.userAuth)
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, episode))
                 }).catch(err => console.log(err))

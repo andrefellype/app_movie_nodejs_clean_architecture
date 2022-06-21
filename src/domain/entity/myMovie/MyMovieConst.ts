@@ -2,12 +2,12 @@ import MyMovie from "./MyMovie"
 
 export const MY_MOVIES_NAME_OBJECT = "my_movies"
 
-export function MyMovieSetObjectDB(userId: object, movieIdValue: object, createdAtValue: string, updatedAtValue: string | null = null) {
+export function MyMovieSetObjectDB(userId: object, movieIdValue: object, createdAtValue: string) {
     return {
         user_id: userId,
         movie_id: movieIdValue,
         created_at: createdAtValue,
-        updated_at: updatedAtValue
+        updated_at: null
     }
 }
 

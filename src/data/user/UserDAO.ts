@@ -53,7 +53,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
-    delete(idDelete: string): Promise<boolean> {
+    deleteById(idDelete: string): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             await Database.deleteByWhere(USER_NAME_OBJECT, { _id: new ObjectId(idDelete) }).then(value => {
                 resolve(true)
@@ -61,17 +61,31 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
             reject(null)
         })
     }
-
+    
     updateByWhere(data: object, where: object): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+
+    updateByIds(data: object, ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.updateByWhere(USER_NAME_OBJECT, data, where).then(value => {
+            const _ids = ids.map(i => new ObjectId(i))
+            await Database.updateByWhere(USER_NAME_OBJECT, data, { _id: { $in: _ids }}).then(value => {
                 resolve(true)
             })
             reject(false)
         })
     }
 
-    open(idOpen: string): Promise<User | null> {
+    updateById(data: object, id: string): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            await Database.updateByWhere(USER_NAME_OBJECT, data, { _id: (new ObjectId(id)) }).then(value => {
+                resolve(true)
+            })
+            reject(false)
+        })
+    }
+
+    openById(idOpen: string): Promise<User | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(USER_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new User(), value) : null)
@@ -80,9 +94,9 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
-    create(nameValue: string, birthValue: string, emailValue: string, cellphoneValue: string, passwordValue: string, levelValue: string, createdAtValue: string, updatedAtValue?: string | null, lastAccessAtValue?: string): Promise<string> {
+    create(nameValue: string, birthValue: string, emailValue: string, cellphoneValue: string, passwordValue: string, levelValue: string, createdAtValue: string, lastAccessAtValue?: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = UserSetObjectDB(nameValue, birthValue, emailValue, cellphoneValue, passwordValue, levelValue, null, true, true, createdAtValue, updatedAtValue, lastAccessAtValue)
+            const objectDb = UserSetObjectDB(nameValue, birthValue, emailValue, cellphoneValue, passwordValue, levelValue, null, true, true, createdAtValue, lastAccessAtValue)
             await Database.insert(USER_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })

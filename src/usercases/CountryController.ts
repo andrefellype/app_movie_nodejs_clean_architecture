@@ -3,78 +3,76 @@ import { validationResult } from 'express-validator'
 import ConvertData from '../app/core/ConvertData'
 import DataJsonResponse from "../app/core/DataJsonResponse"
 import DataReturnResponse from "../app/core/DataReturnResponse"
-import { ObjectId } from 'mongodb'
 import CountryDAO from '../data/country/CountryDAO'
 import { CountryGetObjectForJson } from '../domain/entity/country/CountryConst'
 import MovieController from './MovieController'
 import TvShowController from './TvShowController'
 
 class CountryController {
-    private static async deleteCountry(idsCountry, countryDAO: CountryDAO) {
+    private static async deleteCountryByIds(idsCountry: string[], countryDAO: CountryDAO) {
         await countryDAO.getAllByIds(idsCountry).then(async valueJson => {
-            const idsDelete: object[] = []
-            const idsUpdate: object[] = []
+            const idsDelete: string[] = []
+            const idsUpdate: string[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 if (!valueJson[v].reviewed) {
-                    idsDelete.push((new ObjectId(valueJson[v]._id)))
+                    idsDelete.push(valueJson[v]._id)
                 } else {
-                    idsUpdate.push((new ObjectId(valueJson[v]._id)))
+                    idsUpdate.push(valueJson[v]._id)
                 }
             }
-            await MovieController.deleteMovieOtherInformation(idsDelete, "countries")
+            await MovieController.deleteExtraInformationByMovieId(idsDelete, "countries")
             await TvShowController.deleteTvShowOtherInformation(idsDelete, "countries")
-            await countryDAO.deleteAll({ _id: { $in: idsDelete } })
-            await countryDAO.updateByWhere({ status: false, "updated_at": ConvertData.getDateNowStr() }, { _id: { $in: idsUpdate } })
+            await countryDAO.deleteAllByIds(idsDelete)
+            await countryDAO.updateByIds({ status: false, "updated_at": ConvertData.getDateNowStr() }, idsUpdate)
         })
     }
 
-    public deleteSeveral(req: Request, res: Response): Promise<string> {
+    public deleteSeveralByIds(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                const ids = JSON.parse(req.body._ids)
-                await CountryController.deleteCountry(ids, (new CountryDAO()))
+                await CountryController.deleteCountryByIds(JSON.parse(req.body._ids), (new CountryDAO()))
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }
         })
     }
 
-    public delete(req: Request, res: Response): Promise<string> {
+    public deleteById(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                await CountryController.deleteCountry([req.body.countryId], (new CountryDAO()))
+                await CountryController.deleteCountryByIds([req.body.countryId], (new CountryDAO()))
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }
         })
     }
 
-    public approved(req: Request, res: Response): Promise<string> {
+    public updateApprovedById(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const countryDAO = new CountryDAO()
-                countryDAO.updateByWhere({ reviewed: true, updated_at: ConvertData.getDateNowStr() }, { _id: new ObjectId(req.body.countryId) }).then(async valueUpdate => {
+                countryDAO.updateById({ reviewed: true, updated_at: ConvertData.getDateNowStr() }, req.body.countryId).then(async valueUpdate => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                 }).catch(err => console.log(err))
             }
         })
     }
 
-    public update(req: Request, res: Response): Promise<string> {
+    public updateById(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const countryDAO = new CountryDAO()
-                countryDAO.updateByWhere({ name: req.body.name, updated_at: ConvertData.getDateNowStr() }, { _id: new ObjectId(req.body.countryId) }).then(async valueUpdate => {
+                countryDAO.updateById({ name: req.body.name, updated_at: ConvertData.getDateNowStr() }, req.body.countryId).then(async valueUpdate => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                 }).catch(err => console.log(err))
             }
@@ -88,7 +86,7 @@ class CountryController {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const countryDAO = new CountryDAO()
-                countryDAO.open(req.body.countryId).then(async valueJson => {
+                countryDAO.openById(req.body.countryId).then(async valueJson => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, CountryGetObjectForJson(valueJson!!)))
                 }).catch(err => console.log(err))
             }

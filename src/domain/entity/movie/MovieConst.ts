@@ -5,7 +5,7 @@ export const MOVIE_NAME_OBJECT = "movies"
 export function MovieSetObjectDB(
     titleValue: string, releaseValue: string, durationValue: string, movie_theaterValue: boolean, resume: string, categoriesIdValue: object[],
     directorsIdValue: object[], castsIdValue: object[], countriesIdValue: object[], streamsIdValue: object[], userRegister: object | null,
-    reviewedValue: boolean, statusValue: boolean, createdAtValue: string, updatedAtValue: string | null = null
+    reviewedValue: boolean, statusValue: boolean, createdAtValue: string
 ) {
     return {
         title: titleValue,
@@ -22,7 +22,7 @@ export function MovieSetObjectDB(
         reviewed: reviewedValue,
         status: statusValue,
         created_at: createdAtValue,
-        updated_at: updatedAtValue
+        updated_at: null
     }
 }
 

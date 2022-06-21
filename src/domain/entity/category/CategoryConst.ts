@@ -2,12 +2,12 @@ import Category from "./Category"
 
 export const CATEGORY_NAME_OBJECT = "categories"
 
-export function CategorySetObjectDB(nameValue: string, statusValue: boolean, createdAtValue: string, updatedAtValue: string | null = null) {
+export function CategorySetObjectDB(nameValue: string, statusValue: boolean, createdAtValue: string) {
     return {
         name: nameValue,
         status: statusValue,
         created_at: createdAtValue,
-        updated_at: updatedAtValue
+        updated_at: null
     }
 }
 

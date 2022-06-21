@@ -2,7 +2,9 @@ import MyTvShowEpisodeNeverWatch from "../../entity/myTvShowEpisodeNeverWatch/My
 
 export default interface MyTvShowEpisodeNeverWatchRepository {
     countByTvShowIdAndUserId(tvShowId: string, userId: string): Promise<number>
-    deleteAll(where: object): Promise<boolean>
+    deleteAllByTvShowIds(tvShowIds: string[]): Promise<boolean>
+    deleteAllByTvShowSeasonsIds(idSeasons: string[]): Promise<boolean>
+    deleteAllByTvShowEpisodeIds(idEpisodes: string[]): Promise<boolean>
     countByTvShowSeasonIdAndUserId(seasonId: string, userId: string): Promise<number>
     openByTvShowEpisodeIdAndUserId(episodeId: string, userId: string): Promise<MyTvShowEpisodeNeverWatch | null>
 }

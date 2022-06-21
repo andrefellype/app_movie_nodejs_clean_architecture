@@ -1,4 +1,3 @@
-import ConvertData from "../core/ConvertData"
 import DataReturnResponse from "../core/DataReturnResponse"
 
 export default class Database {

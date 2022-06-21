@@ -19,38 +19,38 @@ import Category from '../domain/entity/category/Category'
 import Stream from '../domain/entity/stream/Stream'
 
 class MyTvShowController {
-    public async deleteMyTvShowAllByTvShowId(idsTvShow: object[]) {
+    public async deleteMyTvShowAllByTvShowId(idsTvShow: string[]) {
         const myTvShowEpisodeDAO = new MyTvShowEpisodeDAO()
         const myTvShowENeverWatchDAO = new MyTvShowNeverWatchDAO()
         const myTvShowESeasonNeverWatchDAO = new MyTvShowSeasonNeverWatchDAO()
         const myTvShowEpisodeNeverWatchDAO = new MyTvShowEpisodeNeverWatchDAO()
-        await myTvShowEpisodeDAO.deleteAll({ tv_show_id: { $in: idsTvShow } })
-        await myTvShowENeverWatchDAO.deleteAll({ tv_show_id: { $in: idsTvShow } })
-        await myTvShowESeasonNeverWatchDAO.deleteAll({ tv_show_id: { $in: idsTvShow } })
-        await myTvShowEpisodeNeverWatchDAO.deleteAll({ tv_show_id: { $in: idsTvShow } })
+        await myTvShowEpisodeDAO.deleteAllByTvShowIds(idsTvShow)
+        await myTvShowENeverWatchDAO.deleteAllByTvShowIds(idsTvShow)
+        await myTvShowESeasonNeverWatchDAO.deleteAllByTvShowIds(idsTvShow)
+        await myTvShowEpisodeNeverWatchDAO.deleteAllByTvShowIds(idsTvShow)
     }
 
-    public async deleteMyTvShowSeasonAllByTvShowSeasonId(idsTvShowSeason: object[]) {
+    public async deleteMyTvShowSeasonAllByTvShowSeasonId(idsTvShowSeason: string[]) {
         const myTvShowSeasonNeverWatchDAO = new MyTvShowSeasonNeverWatchDAO()
-        await myTvShowSeasonNeverWatchDAO.deleteAll({ tv_show_season_id: { $in: idsTvShowSeason } })
+        await myTvShowSeasonNeverWatchDAO.deleteAllByTvShowSeasonIds(idsTvShowSeason)
     }
 
-    public async deleteMyTvShowEpisodeAllByTvShowSeasonId(idsTvShowSeason: object[]) {
+    public async deleteMyTvShowEpisodeAllByTvShowSeasonId(idsTvShowSeason: string[]) {
         const myTvShowEpisodeNeverWatchDAO = new MyTvShowEpisodeNeverWatchDAO()
         const myTvShowEpisodeDAO = new MyTvShowEpisodeDAO()
-        await myTvShowEpisodeNeverWatchDAO.deleteAll({ tv_show_season_id: { $in: idsTvShowSeason } })
-        await myTvShowEpisodeDAO.deleteAll({ tv_show_season_id: { $in: idsTvShowSeason } })
+        await myTvShowEpisodeNeverWatchDAO.deleteAllByTvShowSeasonsIds(idsTvShowSeason)
+        await myTvShowEpisodeDAO.deleteAllByTvShowSeasonsIds(idsTvShowSeason)
     }
 
-    public async deleteMyTvShowEpisodeAllByTvShowEpisodeId(idsTvShowEpisode: object[]) {
+    public async deleteMyTvShowEpisodeAllByTvShowEpisodeId(idsTvShowEpisode: string[]) {
         const myTvShowEpisodeNeverWatchDAO = new MyTvShowEpisodeNeverWatchDAO()
         const myTvShowEpisodeDAO = new MyTvShowEpisodeDAO()
-        await myTvShowEpisodeNeverWatchDAO.deleteAll({ tv_show_episode_id: { $in: idsTvShowEpisode } })
-        await myTvShowEpisodeDAO.deleteAll({ tv_show_episode_id: { $in: idsTvShowEpisode } })
+        await myTvShowEpisodeNeverWatchDAO.deleteAllByTvShowEpisodeIds(idsTvShowEpisode)
+        await myTvShowEpisodeDAO.deleteAllByTvShowEpisodeIds(idsTvShowEpisode)
     }
 
     private static async deleteMyTvShow(tvShowId: string, userId: string, myTvShowEpisodeDAO: MyTvShowEpisodeDAO) {
-        await myTvShowEpisodeDAO.deleteByTvShowIdAndUserId(tvShowId, userId)
+        await myTvShowEpisodeDAO.deleteByTvShowIdAndUserIds(tvShowId, userId)
     }
 
     public delete(req: Request, res: Response): Promise<string> {
@@ -106,7 +106,7 @@ class MyTvShowController {
                         }
                     })
                 } else {
-                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, [{ msg: "Tipo de registro inválido" }]))
+                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, [{ msg: "Tipo de registro inválido." }]))
                 }
             }
         })
@@ -152,7 +152,7 @@ class MyTvShowController {
                             }
                         }
                         if (posInsert == -1) {
-                            await tvShowDAO.open(valuesJson[v].tv_show_id).then(async valueTvShowJson => {
+                            await tvShowDAO.openById(valuesJson[v].tv_show_id).then(async valueTvShowJson => {
                                 let tvShowValue = TvShowGetObjectForJson(valueTvShowJson!!, req.userAuth)
                                 await MyTvShowController.getAllDetailsTvShow(req, tvShowValue).then(tsj => {
                                     tvShowValue = tsj
@@ -192,7 +192,7 @@ class MyTvShowController {
         const tvShowCategories: Category[] = []
         if (req.body.object == null || req.body.object.category) {
             for (let mca = 0; mca < tvShow.categories_id.length; mca++) {
-                await categoryDAO.open(tvShow.categories_id[mca]).then(valueJsonCategory => {
+                await categoryDAO.openById(tvShow.categories_id[mca]).then(valueJsonCategory => {
                     if (valueJsonCategory!!.status) {
                         tvShowCategories.push(valueJsonCategory!!)
                     }
@@ -204,7 +204,7 @@ class MyTvShowController {
         const tvShowCountries: Category[] = []
         if (req.body.object == null || req.body.object.country) {
             for (let mco = 0; mco < tvShow.countries_id.length; mco++) {
-                await countryDAO.open(tvShow.countries_id[mco]).then(valueJsonCountry => {
+                await countryDAO.openById(tvShow.countries_id[mco]).then(valueJsonCountry => {
                     if (valueJsonCountry!!.status) {
                         tvShowCountries.push(valueJsonCountry!!)
                     }
@@ -216,7 +216,7 @@ class MyTvShowController {
         const tvShowStreams: Stream[] = []
         if (req.body.object == null || req.body.object.stream) {
             for (let ms = 0; ms < tvShow.streams_id.length; ms++) {
-                await streamDAO.open(tvShow.streams_id[ms]).then(valueJsonStream => {
+                await streamDAO.openById(tvShow.streams_id[ms]).then(valueJsonStream => {
                     if (valueJsonStream!!.status) {
                         tvShowStreams.push(valueJsonStream!!)
                     }

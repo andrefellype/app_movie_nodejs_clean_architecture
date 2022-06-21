@@ -7,48 +7,45 @@ import sha1 from 'sha1'
 import jwt from 'jsonwebtoken'
 import UserDAO from "../data/user/UserDAO"
 import { UserGetObjectForJson } from "../domain/entity/user/UserConst"
-import { ObjectId } from 'mongodb'
 
 class UserController {
-    private static async deleteUser(idsUser: string[], userDAO: UserDAO) {
-        const ids = idsUser.map(i => new ObjectId(i))
-        await userDAO.updateByWhere({ status: false, "updated_at": ConvertData.getDateNowStr() }, { _id: { $in: ids } })
+    private static async deleteUserByIds(idsUser: string[], userDAO: UserDAO) {
+        await userDAO.updateByIds({ status: false, "updated_at": ConvertData.getDateNowStr() }, idsUser)
     }
 
-    public deleteSeveral(req: Request, res: Response): Promise<string> {
+    public deleteSeveralByIds(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                const ids = JSON.parse(req.body._ids).map(id => new ObjectId(id))
-                await UserController.deleteUser(ids, (new UserDAO()))
+                await UserController.deleteUserByIds(JSON.parse(req.body._ids), (new UserDAO()))
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }
         })
     }
 
-    public delete(req: Request, res: Response): Promise<string> {
+    public deleteById(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                await UserController.deleteUser([req.body.userId], (new UserDAO()))
+                await UserController.deleteUserByIds([req.body.userId], (new UserDAO()))
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }
         })
     }
 
-    public updateEnabled(req: Request, res: Response): Promise<string> {
+    public updateEnabledById(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const userDAO = new UserDAO()
-                userDAO.open(req.body.userId).then(valueUser => {
-                    userDAO.updateByWhere({ enabled: !valueUser!!.enabled, "updated_at": ConvertData.getDateNowStr() }, { _id: new ObjectId(req.body.userId) })
+                userDAO.openById(req.body.userId).then(valueUser => {
+                    userDAO.updateById({ enabled: !valueUser!!.enabled, "updated_at": ConvertData.getDateNowStr() }, req.body.userId)
                         .then(valueUpdate => {
                             DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                         }).catch(err => console.log(err))
@@ -57,18 +54,18 @@ class UserController {
         })
     }
 
-    public updatePassword(req: Request, res: Response): Promise<string> {
+    public updatePasswordById(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const userDAO = new UserDAO()
-                userDAO.updateByWhere({
+                userDAO.updateById({
                     password: sha1(req.body.password),
                     updated_at: ConvertData.getDateNowStr()
-                }, { _id: new ObjectId(req.body.userId) }).then(async valueUpdate => {
-                    userDAO.open(req.userAuth._id).then((value) => {
+                }, req.body.userId).then(async valueUpdate => {
+                    userDAO.openById(req.userAuth._id).then((value) => {
                         DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                     })
                 }).catch(err => console.log(err))
@@ -83,7 +80,7 @@ class UserController {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const userDAO = new UserDAO()
-                userDAO.open(req.body.userId).then(async valueUser => {
+                userDAO.openById(req.body.userId).then(async valueUser => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, UserGetObjectForJson(valueUser!!)))
                 }).catch(err => console.log(err))
             }
@@ -113,18 +110,18 @@ class UserController {
         })
     }
 
-    public updatePasswordToken(req: Request, res: Response): Promise<string> {
+    public updatePasswordByToken(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const userDAO = new UserDAO()
-                userDAO.updateByWhere({
+                userDAO.updateById({
                     password: sha1(req.body.password),
                     updated_at: ConvertData.getDateNowStr()
-                }, { _id: new ObjectId(req.userAuth._id) }).then(async valueUpdate => {
-                    userDAO.open(req.userAuth._id).then((value) => {
+                }, req.userAuth._id).then(async valueUpdate => {
+                    userDAO.openById(req.userAuth._id).then((value) => {
                         const token = jwt.sign({ userAuth: value }, "appmovie", { expiresIn: 43200 })
                         const userData = UserGetObjectForJson(value!!, token)
                         req.session.user = userData
@@ -135,22 +132,22 @@ class UserController {
         })
     }
 
-    public updateToken(req: Request, res: Response): Promise<string> {
+    public updateByToken(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const userDAO = new UserDAO()
-                userDAO.open(req.userAuth._id).then(valueUserJ => {
-                    userDAO.updateByWhere({
+                userDAO.openById(req.userAuth._id).then(valueUserJ => {
+                    userDAO.updateById({
                         name: req.body.name,
                         birth: req.body.birth,
                         email: req.body.email,
                         cellphone: req.body.cellphone,
                         updated_at: ConvertData.getDateNowStr()
-                    }, { _id: new ObjectId(req.userAuth._id) }).then(async valueUpdate => {
-                        userDAO.open(req.userAuth._id).then((value) => {
+                    }, req.userAuth._id).then(async valueUpdate => {
+                        userDAO.openById(req.userAuth._id).then((value) => {
                             const token = jwt.sign({ userAuth: value }, "appmovie", { expiresIn: 43200 })
                             const userData = UserGetObjectForJson(value!!, token)
                             req.session.user = userData
@@ -163,14 +160,14 @@ class UserController {
         })
     }
 
-    public openUserByToken(req: Request, res: Response): Promise<string> {
+    public openByToken(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const userDAO = new UserDAO()
-                userDAO.open(req.userAuth._id).then(async valueUser => {
+                userDAO.openById(req.userAuth._id).then(async valueUser => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, UserGetObjectForJson(valueUser!!)))
                 }).catch(err => console.log(err))
             }
@@ -188,12 +185,12 @@ class UserController {
                     if (valueUser == null) {
                         DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, [{ msg: "Código não consta em nosso registro" }]))
                     } else {
-                        userDAO.updateByWhere({
+                        userDAO.updateById({
                             password: sha1(req.body.password),
                             code_recovery: null,
                             updated_at: ConvertData.getDateNowStr()
-                        }, { _id: new ObjectId(valueUser._id) }).then(value => {
-                            userDAO.open(valueUser._id).then(valueOpen => {
+                        }, valueUser._id).then(value => {
+                            userDAO.openById(valueUser._id).then(valueOpen => {
                                 let userData = valueOpen
                                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, userData))
                             })
@@ -245,7 +242,7 @@ class UserController {
                             codeRecovery += `${ConvertData.getDateObject().year}${ConvertData.getDateObject().month}${ConvertData.getDateObject().day}`
                             codeRecovery += `${ConvertData.getDateObject().hour}${ConvertData.getDateObject().minutes}${ConvertData.getDateObject().seconds}`
 
-                            userDAO.updateByWhere({ code_recovery: codeRecovery }, { _id: new ObjectId(valueUser._id) }).then(value => {
+                            userDAO.updateById({ code_recovery: codeRecovery }, valueUser._id).then(value => {
                                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                             })
                         }
@@ -258,14 +255,14 @@ class UserController {
     public refreshToken(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const userDAO = new UserDAO()
-            userDAO.open(req.userAuth._id).then((value) => {
+            userDAO.openById(req.userAuth._id).then((value) => {
                 if (value !== null) {
                     const token = jwt.sign({ userAuth: value }, "appmovie", { expiresIn: 43200 })
                     const userData = UserGetObjectForJson(value, token)
                     req.session.user = userData
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, userData))
                 } else {
-                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, [{ msg: "Token inválido" }]))
+                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, [{ msg: "Token inválido." }]))
                 }
             })
         })
@@ -285,8 +282,8 @@ class UserController {
                         if (!valueUser.enabled) {
                             DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, [{ msg: "Usuário bloqueado" }]))
                         } else {
-                            userDAO.updateByWhere({ last_access_at: ConvertData.getDateNowStr() }, { _id: new ObjectId(valueUser._id) }).then(valueUpdate => {
-                                userDAO.open(valueUser._id).then(valueOpen => {
+                            userDAO.updateById({ last_access_at: ConvertData.getDateNowStr() }, valueUser._id).then(valueUpdate => {
+                                userDAO.openById(valueUser._id).then(valueOpen => {
                                     const token = jwt.sign({ userAuth: valueOpen }, "appmovie", { expiresIn: 43200 })
                                     const userData = UserGetObjectForJson(valueOpen!!, token)
                                     req.session.user = userData
@@ -300,7 +297,7 @@ class UserController {
         })
     }
 
-    public createMain(req: Request, res: Response): Promise<string> {
+    public signUp(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
@@ -310,8 +307,8 @@ class UserController {
                 userDAO.getAll().then(async valuesUser => {
                     const level = valuesUser.length > 0 ? "COMMON" : "ADMIN"
                     const dateNow = ConvertData.getDateNowStr()
-                    userDAO.create(req.body.name, req.body.birth, req.body.email, req.body.cellphone, sha1(req.body.password), level, dateNow, null, dateNow).then(async valueId => {
-                        userDAO.open(valueId.toString()).then((value) => {
+                    userDAO.create(req.body.name, req.body.birth, req.body.email, req.body.cellphone, sha1(req.body.password), level, dateNow, dateNow).then(async valueId => {
+                        userDAO.openById(valueId.toString()).then((value) => {
                             const token = jwt.sign({ userAuth: value }, "appmovie", { expiresIn: 43200 })
                             const userData = UserGetObjectForJson(value!!, token)
                             req.session.user = userData

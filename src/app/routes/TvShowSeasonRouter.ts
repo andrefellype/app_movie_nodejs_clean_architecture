@@ -14,37 +14,37 @@ class TvShowSeasonRouter {
         this.getAll()
         this.create()
         this.openById()
-        this.update()
-        this.approved()
-        this.delete()
-        this.deleteSeveral()
+        this.updateById()
+        this.updateApprovedById()
+        this.deleteById()
+        this.deleteSeveralByIds()
         this.getAllByNotMyTvShow()
     }
 
     private getAllByNotMyTvShow() {
-        return this.routes.post('/tvshowseason/open/all/notmytvshow', body('tvShowId').notEmpty().withMessage("Série obrigatória"), this.verifyJWT, TvShowSeasonController.getAllByNotMyTvShow)
+        return this.routes.post('/tvshowseason/open/all/notmytvshow', body('tvShowId').notEmpty().withMessage("Série obrigatória."), this.verifyJWT, TvShowSeasonController.getAllByNotMyTvShow)
     }
 
-    private deleteSeveral() {
-        return this.routes.post('/tvshowseason/delete/several', body('_ids').notEmpty(), this.verifyJWT, TvShowSeasonController.deleteSeveral)
+    private deleteSeveralByIds() {
+        return this.routes.post('/tvshowseason/delete/several', body('_ids').notEmpty(), this.verifyJWT, TvShowSeasonController.deleteSeveralByIds)
     }
 
-    private delete() {
-        return this.routes.post('/tvshowseason/delete', body('tvShowSeasonId').notEmpty(), this.verifyJWT, TvShowSeasonController.delete)
+    private deleteById() {
+        return this.routes.post('/tvshowseason/delete', body('tvShowSeasonId').notEmpty(), this.verifyJWT, TvShowSeasonController.deleteById)
     }
 
-    private approved() {
-        return this.routes.post('/tvshowseason/approved/reviewed', body('tvShowSeasonId').notEmpty(), this.verifyJWT, TvShowSeasonController.approved)
+    private updateApprovedById() {
+        return this.routes.post('/tvshowseason/approved/reviewed', body('tvShowSeasonId').notEmpty(), this.verifyJWT, TvShowSeasonController.updateApprovedById)
     }
 
-    private update() {
+    private updateById() {
         const tvShowSeasonDAO = new TvShowSeasonDAO()
-        return this.routes.post('/tvshowseason/update', body('tvShowSeasonId').notEmpty(), body('tvShowId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório").custom(async (value, { req }) => {
+        return this.routes.post('/tvshowseason/update', body('tvShowSeasonId').notEmpty(), body('tvShowId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.").custom(async (value, { req }) => {
             return new Promise((resolve, reject) => {
                 if (req.body.tvShowId != null && req.body.tvShowId.length > 0 && req.body.tvShowSeasonId != null && req.body.tvShowSeasonId.length > 0) {
                     tvShowSeasonDAO.openByNameAndTvShowId(req.body.name, req.body.tvShowId).then((valueJson) => {
                         if (valueJson != null && valueJson._id != req.body.tvShowSeasonId) {
-                            DataReturnResponse.returnReject(reject, new Error('Nome já existente'))
+                            DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
                         } else {
                             DataReturnResponse.returnResolve(resolve, true)
                         }
@@ -57,7 +57,7 @@ class TvShowSeasonRouter {
             }).catch(err => {
                 throw new Error(err.message)
             })
-        }), this.verifyJWT, TvShowSeasonController.update)
+        }), this.verifyJWT, TvShowSeasonController.updateById)
     }
 
     private openById() {
@@ -66,12 +66,12 @@ class TvShowSeasonRouter {
 
     private create() {
         const tvShowSeasonDAO = new TvShowSeasonDAO()
-        return this.routes.post('/tvshowseason/register', body('tvShowId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório").custom(async (value, { req }) => {
+        return this.routes.post('/tvshowseason/register', body('tvShowId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.").custom(async (value, { req }) => {
             return new Promise((resolve, reject) => {
                 if (req.body.tvShowId.length > 0) {
                     tvShowSeasonDAO.openByNameAndTvShowId(req.body.name, req.body.tvShowId).then((valueJson) => {
                         if (valueJson != null) {
-                            DataReturnResponse.returnReject(reject, new Error('Nome já existente'))
+                            DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
                         } else {
                             DataReturnResponse.returnResolve(resolve, true)
                         }
@@ -88,7 +88,7 @@ class TvShowSeasonRouter {
     }
 
     private getAll() {
-        return this.routes.post('/tvshowseason/open/all', body('tvShowId').notEmpty().withMessage("Série obrigatória"), this.verifyJWT, TvShowSeasonController.getAll)
+        return this.routes.post('/tvshowseason/open/all', body('tvShowId').notEmpty().withMessage("Série obrigatória."), this.verifyJWT, TvShowSeasonController.getAll)
     }
 
     private verifyJWT(req, res, next) {

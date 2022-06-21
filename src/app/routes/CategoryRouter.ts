@@ -14,27 +14,27 @@ class CategoryRouter {
         this.getAll()
         this.create()
         this.openById()
-        this.update()
-        this.delete()
-        this.deleteSeveral()
+        this.updateById()
+        this.deleteById()
+        this.deleteSeveralByIds()
     }
 
-    private deleteSeveral() {
-        return this.routes.post('/category/delete/several', body('_ids').notEmpty(), this.verifyJWT, CategoryController.deleteSeveral)
+    private deleteSeveralByIds() {
+        return this.routes.post('/category/delete/several', body('_ids').notEmpty(), this.verifyJWT, CategoryController.deleteSeveralByIds)
     }
 
-    private delete() {
-        return this.routes.post('/category/delete', body('categoryId').notEmpty(), this.verifyJWT, CategoryController.delete)
+    private deleteById() {
+        return this.routes.post('/category/delete', body('categoryId').notEmpty(), this.verifyJWT, CategoryController.deleteById)
     }
 
-    private update() {
+    private updateById() {
         const categoryDAO = new CategoryDAO()
-        return this.routes.post('/category/update', body('categoryId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório").custom(async (value, { req }) => {
+        return this.routes.post('/category/update', body('categoryId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.").custom(async (value, { req }) => {
             return new Promise((resolve, reject) => {
                 if (req.body.categoryId != null && req.body.categoryId.length > 0) {
                     categoryDAO.openByName(value).then((valueJson) => {
                         if (valueJson != null && valueJson._id != req.body.categoryId) {
-                            DataReturnResponse.returnReject(reject, new Error('Nome já existente'))
+                            DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
                         } else {
                             DataReturnResponse.returnResolve(resolve, true)
                         }
@@ -47,7 +47,7 @@ class CategoryRouter {
             }).catch(err => {
                 throw new Error(err.message)
             })
-        }), this.verifyJWT, CategoryController.update)
+        }), this.verifyJWT, CategoryController.updateById)
     }
 
     private openById() {
@@ -56,11 +56,11 @@ class CategoryRouter {
 
     private create() {
         const categoryDAO = new CategoryDAO()
-        return this.routes.post('/category/register', body('name').notEmpty().withMessage("Nome obrigatório").custom(async (value) => {
+        return this.routes.post('/category/register', body('name').notEmpty().withMessage("Nome obrigatório.").custom(async (value) => {
             return new Promise((resolve, reject) => {
                 categoryDAO.openByName(value).then((valueJson) => {
                     if (valueJson != null) {
-                        DataReturnResponse.returnReject(reject, new Error('Nome já existente'))
+                        DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
                     } else {
                         DataReturnResponse.returnResolve(resolve, true)
                     }

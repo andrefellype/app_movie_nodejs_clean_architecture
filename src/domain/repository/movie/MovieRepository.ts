@@ -1,12 +1,12 @@
 import Movie from "../../entity/movie/Movie"
 
 export default interface MovieRepository {
-    deleteAll(where: object): Promise<boolean>
+    deleteAllByIds(ids: string[]): Promise<boolean>
     getAllByIds(ids: string[]): Promise<Movie[]>
-    getAllByStreamsId(streamsIdValue: object[]): Promise<Movie[]>
-    getAllByCountriesId(countriesIdValue: object[]): Promise<Movie[]>
-    getAllByCastsId(castsIdValue: object[]): Promise<Movie[]>
-    getAllByDirectorsId(directorsIdValue: object[]): Promise<Movie[]>
+    getAllByStreamsIds(streamsIdValue: string[]): Promise<Movie[]>
+    getAllByCountriesIds(countriesIdValue: string[]): Promise<Movie[]>
+    getAllByCastsIds(castsIdValue: string[]): Promise<Movie[]>
+    getAllByDirectorsIds(directorsIdValue: string[]): Promise<Movie[]>
     openByTitle(titleValue: string): Promise<Movie | null>
     getAllByStatus(statusValue: boolean): Promise<Movie[]>
 }

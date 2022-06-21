@@ -4,7 +4,7 @@ export const USER_NAME_OBJECT = "users"
 
 export function UserSetObjectDB(
     nameValue: string, birthValue: string, emailValue: string, cellphoneValue: string, passwordValue: string, levelValue: string, codeRecoveryValue: string | null, enabledValue: boolean, statusValue: boolean,
-    createdAtValue: string, updatedAtValue: string | null = null, lastAccessAtValue: string | null = null
+    createdAtValue: string, lastAccessAtValue: string | null = null
 ) {
     return {
         name: nameValue,
@@ -17,7 +17,7 @@ export function UserSetObjectDB(
         enabled: enabledValue,
         status: statusValue,
         created_at: createdAtValue,
-        updated_at: updatedAtValue,
+        updated_at: null,
         last_access_at: lastAccessAtValue
     }
 }

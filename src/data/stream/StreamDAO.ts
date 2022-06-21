@@ -6,9 +6,10 @@ import StreamRepository from "../../domain/repository/stream/StreamRepository"
 import { StreamSetObjectDB, STREAM_NAME_OBJECT } from "../../domain/entity/stream/StreamConst"
 
 export default class StreamDAO implements StreamRepository, CrudRepository<Stream> {
-    deleteAll(where: object): Promise<boolean> {
+    deleteAllByIds(ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.deleteByWhere(STREAM_NAME_OBJECT, where).then(value => {
+            const _ids = ids.map(i => new ObjectId(i))
+            await Database.deleteByWhere(STREAM_NAME_OBJECT, { _id: { $in: _ids }}).then(value => {
                 resolve(true)
             })
             reject(null)
@@ -47,7 +48,7 @@ export default class StreamDAO implements StreamRepository, CrudRepository<Strea
         })
     }
 
-    delete(idDelete: string): Promise<boolean> {
+    deleteById(idDelete: string): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             await Database.deleteByWhere(STREAM_NAME_OBJECT, { _id: new ObjectId(idDelete) }).then(value => {
                 resolve(true)
@@ -55,17 +56,31 @@ export default class StreamDAO implements StreamRepository, CrudRepository<Strea
             reject(null)
         })
     }
-
+    
     updateByWhere(data: object, where: object): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+
+    updateByIds(data: object, ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.updateByWhere(STREAM_NAME_OBJECT, data, where).then(value => {
+            const _ids = ids.map(i => new ObjectId(i))
+            await Database.updateByWhere(STREAM_NAME_OBJECT, data, { _id: { $in: _ids }}).then(value => {
                 resolve(true)
             })
             reject(false)
         })
     }
 
-    open(idOpen: string): Promise<Stream | null> {
+    updateById(data: object, id: string): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            await Database.updateByWhere(STREAM_NAME_OBJECT, data, { _id: (new ObjectId(id)) }).then(value => {
+                resolve(true)
+            })
+            reject(false)
+        })
+    }
+
+    openById(idOpen: string): Promise<Stream | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(STREAM_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new Stream(), value) : null)
@@ -74,9 +89,9 @@ export default class StreamDAO implements StreamRepository, CrudRepository<Strea
         })
     }
 
-    create(nameValue: string, userRegister: string, reviewedValue: boolean, createdAtValue: string, updatedAtValue?: string): Promise<string> {
+    create(nameValue: string, userRegister: string, reviewedValue: boolean, createdAtValue: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = StreamSetObjectDB(nameValue, (new ObjectId(userRegister)), reviewedValue, true, createdAtValue, updatedAtValue)
+            const objectDb = StreamSetObjectDB(nameValue, (new ObjectId(userRegister)), reviewedValue, true, createdAtValue)
             await Database.insert(STREAM_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })

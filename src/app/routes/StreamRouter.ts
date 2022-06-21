@@ -14,32 +14,32 @@ class StreamRouter {
         this.getAll()
         this.create()
         this.openById()
-        this.update()
-        this.approved()
-        this.delete()
-        this.deleteSeveral()
+        this.updateById()
+        this.updateApprovedById()
+        this.deleteById()
+        this.deleteSeveralByIds()
     }
 
-    private deleteSeveral() {
-        return this.routes.post('/stream/delete/several', body('_ids').notEmpty(), this.verifyJWT, StreamController.deleteSeveral)
+    private deleteSeveralByIds() {
+        return this.routes.post('/stream/delete/several', body('_ids').notEmpty(), this.verifyJWT, StreamController.deleteSeveralByIds)
     }
 
-    private delete() {
-        return this.routes.post('/stream/delete', body('streamId').notEmpty(), this.verifyJWT, StreamController.delete)
+    private deleteById() {
+        return this.routes.post('/stream/delete', body('streamId').notEmpty(), this.verifyJWT, StreamController.deleteById)
     }
 
-    private approved() {
-        return this.routes.post('/stream/approved/reviewed', body('streamId').notEmpty(), this.verifyJWT, StreamController.approved)
+    private updateApprovedById() {
+        return this.routes.post('/stream/approved/reviewed', body('streamId').notEmpty(), this.verifyJWT, StreamController.updateApprovedById)
     }
 
-    private update() {
+    private updateById() {
         const streamDAO = new StreamDAO()
-        return this.routes.post('/stream/update', body('streamId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório").custom(async (value, { req }) => {
+        return this.routes.post('/stream/update', body('streamId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.").custom(async (value, { req }) => {
             return new Promise((resolve, reject) => {
                 if (req.body.streamId != null && req.body.streamId.length > 0) {
                     streamDAO.openByName(value).then((valueJson) => {
                         if (valueJson != null && valueJson._id != req.body.streamId) {
-                            DataReturnResponse.returnReject(reject, new Error('Nome já existente'))
+                            DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
                         } else {
                             DataReturnResponse.returnResolve(resolve, true)
                         }
@@ -52,7 +52,7 @@ class StreamRouter {
             }).catch(err => {
                 throw new Error(err.message)
             })
-        }), this.verifyJWT, StreamController.update)
+        }), this.verifyJWT, StreamController.updateById)
     }
 
     private openById() {
@@ -61,12 +61,12 @@ class StreamRouter {
 
     private create() {
         const streamDAO = new StreamDAO()
-        return this.routes.post('/stream/register', body('reviewed').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório")
+        return this.routes.post('/stream/register', body('reviewed').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.")
             .custom(async (value) => {
                 return new Promise((resolve, reject) => {
                     streamDAO.openByName(value).then((valueJson) => {
                         if (valueJson != null) {
-                            DataReturnResponse.returnReject(reject, new Error('Nome já existente'))
+                            DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
                         } else {
                             DataReturnResponse.returnResolve(resolve, true)
                         }

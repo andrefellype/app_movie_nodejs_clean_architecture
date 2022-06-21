@@ -2,14 +2,14 @@ import Actor from "./Actor"
 
 export const ACTOR_NAME_OBJECT = "actors"
 
-export function ActorSetObjectDB(nameValue: string, userRegister: object, reviewedValue: boolean, statusValue: boolean, createdAtValue: string, updatedAtValue: string | null = null) {
+export function ActorSetObjectDB(nameValue: string, userRegister: object, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
     return {
         name: nameValue,
         user_register: userRegister,
         reviewed: reviewedValue,
         status: statusValue,
         created_at: createdAtValue,
-        updated_at: updatedAtValue
+        updated_at: null
     }
 }
 

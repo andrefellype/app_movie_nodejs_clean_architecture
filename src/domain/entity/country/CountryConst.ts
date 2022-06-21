@@ -2,14 +2,14 @@ import Country from "./Country"
 
 export const COUNTRY_NAME_OBJECT = "countries"
 
-export function CountrySetObjectDB(nameValue: string, userRegister: object, reviewedValue: boolean, statusValue: boolean, createdAtValue: string, updatedAtValue: string | null = null) {
+export function CountrySetObjectDB(nameValue: string, userRegister: object, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
     return {
         name: nameValue,
         user_register: userRegister,
         reviewed: reviewedValue,
         status: statusValue,
         created_at: createdAtValue,
-        updated_at: updatedAtValue
+        updated_at: null
     }
 }
 

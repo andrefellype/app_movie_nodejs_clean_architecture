@@ -3,76 +3,74 @@ import { validationResult } from 'express-validator'
 import ConvertData from '../app/core/ConvertData'
 import DataJsonResponse from "../app/core/DataJsonResponse"
 import DataReturnResponse from "../app/core/DataReturnResponse"
-import { ObjectId } from 'mongodb'
 import ActorDAO from '../data/actor/ActorDAO'
 import { ActorGetObjectForJson } from '../domain/entity/actor/ActorConst'
 import MovieController from './MovieController'
 
 class ActorController {
-    private static async deleteActor(idsActor: string[], actorDAO: ActorDAO) {
+    private static async deleteActorByIds(idsActor: string[], actorDAO: ActorDAO) {
         await actorDAO.getAllByIds(idsActor).then(async valueJson => {
-            const idsDelete: object[] = []
-            const idsUpdate: object[] = []
+            const idsDelete: string[] = []
+            const idsUpdate: string[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 if (!valueJson[v].reviewed) {
-                    idsDelete.push((new ObjectId(valueJson[v]._id)))
+                    idsDelete.push(valueJson[v]._id)
                 } else {
-                    idsUpdate.push((new ObjectId(valueJson[v]._id)))
+                    idsUpdate.push(valueJson[v]._id)
                 }
             }
-            await MovieController.deleteMovieOtherInformation(idsDelete, "casts")
-            await actorDAO.deleteAll({ _id: { $in: idsDelete } })
-            await actorDAO.updateByWhere({ status: false, "updated_at": ConvertData.getDateNowStr() }, { _id: { $in: idsUpdate } })
+            await MovieController.deleteExtraInformationByMovieId(idsDelete, "casts")
+            await actorDAO.deleteAllByIds(idsDelete)
+            await actorDAO.updateByIds({ status: false, "updated_at": ConvertData.getDateNowStr() }, idsUpdate)
         })
     }
 
-    public deleteSeveral(req: Request, res: Response): Promise<string> {
+    public deleteSeveralByIds(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                const ids = JSON.parse(req.body._ids)
-                await ActorController.deleteActor(ids, (new ActorDAO()))
+                await ActorController.deleteActorByIds(JSON.parse(req.body._ids), (new ActorDAO()))
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }
         })
     }
 
-    public delete(req: Request, res: Response): Promise<string> {
+    public deleteById(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                await ActorController.deleteActor([req.body.actorId], (new ActorDAO()))
+                await ActorController.deleteActorByIds([req.body.actorId], (new ActorDAO()))
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }
         })
     }
 
-    public approved(req: Request, res: Response): Promise<string> {
+    public updateApprovedById(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const actorDAO = new ActorDAO()
-                actorDAO.updateByWhere({ reviewed: true, updated_at: ConvertData.getDateNowStr() }, { _id: new ObjectId(req.body.actorId) }).then(async valueUpdate => {
+                actorDAO.updateById({ reviewed: true, updated_at: ConvertData.getDateNowStr() }, req.body.actorId).then(async valueUpdate => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                 }).catch(err => console.log(err))
             }
         })
     }
 
-    public update(req: Request, res: Response): Promise<string> {
+    public updateById(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const actorDAO = new ActorDAO()
-                actorDAO.updateByWhere({ name: req.body.name, updated_at: ConvertData.getDateNowStr() }, { _id: new ObjectId(req.body.actorId) }).then(async valueUpdate => {
+                actorDAO.updateById({ name: req.body.name, updated_at: ConvertData.getDateNowStr() }, req.body.actorId).then(async valueUpdate => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                 }).catch(err => console.log(err))
             }
@@ -86,7 +84,7 @@ class ActorController {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const actorDAO = new ActorDAO()
-                actorDAO.open(req.body.actorId).then(async valueJson => {
+                actorDAO.openById(req.body.actorId).then(async valueJson => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, ActorGetObjectForJson(valueJson!!)))
                 }).catch(err => console.log(err))
             }

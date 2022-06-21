@@ -26,7 +26,7 @@ export default class CategoryDAO implements CategoryRepository, CrudRepository<C
         })
     }
 
-    delete(idDelete: string): Promise<boolean> {
+    deleteById(idDelete: string): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             await Database.deleteByWhere(CATEGORY_NAME_OBJECT, { _id: new ObjectId(idDelete) }).then(value => {
                 resolve(true)
@@ -34,17 +34,31 @@ export default class CategoryDAO implements CategoryRepository, CrudRepository<C
             reject(null)
         })
     }
-
+    
     updateByWhere(data: object, where: object): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+
+    updateByIds(data: object, ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.updateByWhere(CATEGORY_NAME_OBJECT, data, where).then(value => {
+            const _ids = ids.map(i => new ObjectId(i))
+            await Database.updateByWhere(CATEGORY_NAME_OBJECT, data, { _id: { $in: _ids }}).then(value => {
                 resolve(true)
             })
             reject(false)
         })
     }
 
-    open(idOpen: string): Promise<Category | null> {
+    updateById(data: object, id: string): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            await Database.updateByWhere(CATEGORY_NAME_OBJECT, data, { _id: (new ObjectId(id)) }).then(value => {
+                resolve(true)
+            })
+            reject(false)
+        })
+    }
+
+    openById(idOpen: string): Promise<Category | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(CATEGORY_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new Category(), value) : null)
@@ -53,9 +67,9 @@ export default class CategoryDAO implements CategoryRepository, CrudRepository<C
         })
     }
 
-    create(nameValue: string, createdAtValue: string, updatedAtValue?: string): Promise<string> {
+    create(nameValue: string, createdAtValue: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = CategorySetObjectDB(nameValue, true, createdAtValue, updatedAtValue)
+            const objectDb = CategorySetObjectDB(nameValue, true, createdAtValue)
             await Database.insert(CATEGORY_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })

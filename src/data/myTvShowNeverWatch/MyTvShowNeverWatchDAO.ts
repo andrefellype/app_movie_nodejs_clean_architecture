@@ -6,9 +6,10 @@ import { MY_TV_SHOW_NEVER_WATCHS_NAME_OBJECT, MyTvShowNeverWatchSetObjectDB } fr
 import MyTvShowNeverWatchRepository from "../../domain/repository/myTvShowNeverWatch/MyTvShowNeverWatchRepository"
 
 export default class MyTvShowNeverWatchDAO implements MyTvShowNeverWatchRepository, CrudRepository<MyTvShowNeverWatch> {
-    deleteAll(where: object): Promise<boolean> {
+    deleteAllByTvShowIds(tvShowIds: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.deleteByWhere(MY_TV_SHOW_NEVER_WATCHS_NAME_OBJECT, where).then(value => {
+            const _ids = tvShowIds.map(i => new ObjectId(i))
+            await Database.deleteByWhere(MY_TV_SHOW_NEVER_WATCHS_NAME_OBJECT, { tv_show_id: { $in: _ids } }).then(value => {
                 resolve(true)
             })
             reject(null)
@@ -23,20 +24,27 @@ export default class MyTvShowNeverWatchDAO implements MyTvShowNeverWatchReposito
             reject([])
         })
     }
-
-    delete(idDelete: string): Promise<boolean> {
+    
+    deleteById(idDelete: string): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
     updateByWhere(data: object, where: object): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
-    open(idOpen: string): Promise<MyTvShowNeverWatch> {
+    updateByIds(data: object, ids: string[]): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+    updateById(data: object, id: string): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+    
+    openById(idOpen: string): Promise<MyTvShowNeverWatch> {
         throw new Error("Method not implemented.")
     }
 
-    create(userId: string, tvShowId: string, createdAtValue: string, updatedAtValue?: string): Promise<string> {
+    create(userId: string, tvShowId: string, createdAtValue: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = MyTvShowNeverWatchSetObjectDB(new ObjectId(userId), new ObjectId(tvShowId), createdAtValue, updatedAtValue)
+            const objectDb = MyTvShowNeverWatchSetObjectDB(new ObjectId(userId), new ObjectId(tvShowId), createdAtValue)
             await Database.insert(MY_TV_SHOW_NEVER_WATCHS_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })

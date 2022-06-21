@@ -23,29 +23,29 @@ import Country from '../domain/entity/country/Country'
 import Stream from '../domain/entity/stream/Stream'
 
 class TvShowController {
-    public async deleteTvShowOtherInformation(idsInformation: object[], typeInformation: string) {
+    public async deleteTvShowOtherInformation(idsInformation: string[], typeInformation: string) {
         if (typeInformation == "countries") {
             const tvShowDAO = new TvShowDAO()
-            await tvShowDAO.getAllByCountriesId(idsInformation).then(async tvShowsJson => {
-                const valuesUpdate: { data: object, idValue: object }[] = []
+            await tvShowDAO.getAllByCountriesIds(idsInformation).then(async tvShowsJson => {
+                const valuesUpdate: { data: object, idValue: string }[] = []
                 for (let s = 0; s < tvShowsJson.length; s++) {
                     const countries = tvShowsJson[s].countries_id.filter(f => idsInformation.filter(i => i.toString() == f.toString()).length == 0)
-                    valuesUpdate.push({ data: { countries_id: countries }, idValue: new ObjectId(tvShowsJson[s]._id) })
+                    valuesUpdate.push({ data: { countries_id: countries }, idValue: tvShowsJson[s]._id })
                 }
                 for (let v = 0; v < valuesUpdate.length; v++) {
-                    tvShowDAO.updateByWhere(valuesUpdate[v].data, { _id: valuesUpdate[v].idValue })
+                    tvShowDAO.updateById(valuesUpdate[v].data, valuesUpdate[v].idValue)
                 }
             })
         } else if (typeInformation == "streams") {
             const tvShowDAO = new TvShowDAO()
-            await tvShowDAO.getAllByStreamsId(idsInformation).then(async tvShowsJson => {
-                const valuesUpdate: { data: object, idValue: object }[] = []
+            await tvShowDAO.getAllByStreamsIds(idsInformation).then(async tvShowsJson => {
+                const valuesUpdate: { data: object, idValue: string }[] = []
                 for (let s = 0; s < tvShowsJson.length; s++) {
                     const streams = tvShowsJson[s].streams_id.filter(f => idsInformation.filter(i => i.toString() == f.toString()).length == 0)
-                    valuesUpdate.push({ data: { streams_id: streams }, idValue: new ObjectId(tvShowsJson[s]._id) })
+                    valuesUpdate.push({ data: { streams_id: streams }, idValue: tvShowsJson[s]._id })
                 }
                 for (let v = 0; v < valuesUpdate.length; v++) {
-                    tvShowDAO.updateByWhere(valuesUpdate[v].data, { _id: valuesUpdate[v].idValue })
+                    tvShowDAO.updateById(valuesUpdate[v].data, valuesUpdate[v].idValue)
                 }
             })
         }
@@ -75,65 +75,64 @@ class TvShowController {
         })
     }
 
-    private static async deleteTvShow(idsTvShow: string[], tvShowDAO: TvShowDAO) {
+    private static async deleteTvShowByIds(idsTvShow: string[], tvShowDAO: TvShowDAO) {
         await tvShowDAO.getAllByIds(idsTvShow).then(async valueJson => {
-            const idsDelete: object[] = []
-            const idsUpdate: object[] = []
+            const idsDelete: string[] = []
+            const idsUpdate: string[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 if (!valueJson[v].reviewed) {
-                    idsDelete.push((new ObjectId(valueJson[v]._id)))
+                    idsDelete.push(valueJson[v]._id)
                 } else {
-                    idsUpdate.push((new ObjectId(valueJson[v]._id)))
+                    idsUpdate.push(valueJson[v]._id)
                 }
             }
             await MyTvShowController.deleteMyTvShowAllByTvShowId(idsDelete)
             await TvShowSeasonController.deleteSeasonAllByTvShowId(idsDelete)
             await TvShowEpisodeController.deleteEpisodeAllByTvShowId(idsDelete)
-            await tvShowDAO.deleteAll({ _id: { $in: idsDelete } })
-            await tvShowDAO.updateByWhere({ status: false, "updated_at": ConvertData.getDateNowStr() }, { _id: { $in: idsUpdate } })
+            await tvShowDAO.deleteAllByIds(idsDelete)
+            await tvShowDAO.updateByIds({ status: false, "updated_at": ConvertData.getDateNowStr() }, idsUpdate)
         })
     }
 
-    public deleteSeveral(req: Request, res: Response): Promise<string> {
+    public deleteSeveralByIds(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                const ids = JSON.parse(req.body._ids)
-                await TvShowController.deleteTvShow(ids, (new TvShowDAO()))
+                await TvShowController.deleteTvShowByIds(JSON.parse(req.body._ids), (new TvShowDAO()))
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }
         })
     }
 
-    public delete(req: Request, res: Response): Promise<string> {
+    public deleteById(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                await TvShowController.deleteTvShow([req.body.tvShowId], (new TvShowDAO()))
+                await TvShowController.deleteTvShowByIds([req.body.tvShowId], (new TvShowDAO()))
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }
         })
     }
 
-    public approved(req: Request, res: Response): Promise<string> {
+    public updateApprovedById(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const tvShowDAO = new TvShowDAO()
-                tvShowDAO.updateByWhere({ reviewed: true, updated_at: ConvertData.getDateNowStr() }, { _id: new ObjectId(req.body.tvShowId) }).then(async valueUpdate => {
+                tvShowDAO.updateById({ reviewed: true, updated_at: ConvertData.getDateNowStr() }, req.body.tvShowId).then(async valueUpdate => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                 }).catch(err => console.log(err))
             }
         })
     }
 
-    public update(req: Request, res: Response): Promise<string> {
+    public updateById(req: Request, res: Response): Promise<string> {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
@@ -143,10 +142,10 @@ class TvShowController {
                 const categories = req.body.categories.map(ca => new ObjectId(ca))
                 const countries = req.body.countries.map(co => new ObjectId(co))
                 const streams = req.body.streams.map(st => new ObjectId(st))
-                tvShowDAO.updateByWhere({
+                tvShowDAO.updateById({
                     title: req.body.title, release: req.body.release, resume: req.body.resume, categories_id: categories, countries_id: countries,
                     streams_id: streams, updated_at: ConvertData.getDateNowStr()
-                }, { _id: new ObjectId(req.body.tvShowId) }).then(async valueUpdate => {
+                }, req.body.tvShowId).then(async valueUpdate => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                 }).catch(err => console.log(err))
             }
@@ -160,7 +159,7 @@ class TvShowController {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const tvShowDAO = new TvShowDAO()
-                tvShowDAO.open(req.body.tvShowId).then(async valueJson => {
+                tvShowDAO.openById(req.body.tvShowId).then(async valueJson => {
                     let tvShow = TvShowGetObjectForJson(valueJson!!, req.userAuth)
                     await TvShowController.getAllDetailsTvShow(req, tvShow).then(valueDetails => tvShow = valueDetails)
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, tvShow))
@@ -259,7 +258,7 @@ class TvShowController {
             const tvShowCategories: Category[] = []
             if (req.body.object == null || req.body.object.category) {
                 for (let mca = 0; mca < tvShow.categories_id.length; mca++) {
-                    await categoryDAO.open(tvShow.categories_id[mca]).then(valueJsonCategory => {
+                    await categoryDAO.openById(tvShow.categories_id[mca]).then(valueJsonCategory => {
                         if (valueJsonCategory!!.status) {
                             tvShowCategories.push(valueJsonCategory!!)
                         }
@@ -271,7 +270,7 @@ class TvShowController {
             const tvShowCountries: Country[] = []
             if (req.body.object == null || req.body.object.country) {
                 for (let mco = 0; mco < tvShow.countries_id.length; mco++) {
-                    await countryDAO.open(tvShow.countries_id[mco]).then(valueJsonCountry => {
+                    await countryDAO.openById(tvShow.countries_id[mco]).then(valueJsonCountry => {
                         if (valueJsonCountry!!.status) {
                             tvShowCountries.push(valueJsonCountry!!)
                         }
@@ -283,7 +282,7 @@ class TvShowController {
             const tvShowStreams: Stream[] = []
             if (req.body.object == null || req.body.object.stream) {
                 for (let ms = 0; ms < tvShow.streams_id.length; ms++) {
-                    await streamDAO.open(tvShow.streams_id[ms]).then(valueJsonStream => {
+                    await streamDAO.openById(tvShow.streams_id[ms]).then(valueJsonStream => {
                         if (valueJsonStream!!.status) {
                             tvShowStreams.push(valueJsonStream!!)
                         }

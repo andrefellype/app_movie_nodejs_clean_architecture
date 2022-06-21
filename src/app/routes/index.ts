@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import UserRouter from './UserRouter'
-import AppRouter from './AppRouter'
+import AboutUsRouter from './AboutUsRouter'
 import CategoryRouter from './CategoryRouter'
 import DirectorRouter from './DirectorRouter'
 import ActorRouter from './ActorRouter'
@@ -20,7 +20,7 @@ routes.get("/", (res, req) => {
 })
 
 UserRouter.getRoutes(routes)
-AppRouter.getRoutes(routes)
+AboutUsRouter.getRoutes(routes)
 CategoryRouter.getRoutes(routes)
 DirectorRouter.getRoutes(routes)
 ActorRouter.getRoutes(routes)

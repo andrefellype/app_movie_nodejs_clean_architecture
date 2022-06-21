@@ -6,9 +6,10 @@ import TvShow from "../../domain/entity/tvShow/TvShow"
 import { TvShowSetObjectDB, TV_SHOW_NAME_OBJECT } from "../../domain/entity/tvShow/TvShowConst"
 
 export default class TvShowDAO implements TvShowRepository, CrudRepository<TvShow> {
-    deleteAll(where: object): Promise<boolean> {
+    deleteAllByIds(ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.deleteByWhere(TV_SHOW_NAME_OBJECT, where).then(value => {
+            const _ids = ids.map(i => new ObjectId(i))
+            await Database.deleteByWhere(TV_SHOW_NAME_OBJECT, { _id: { $in: _ids } }).then(value => {
                 resolve(true)
             })
             reject(null)
@@ -27,9 +28,10 @@ export default class TvShowDAO implements TvShowRepository, CrudRepository<TvSho
         })
     }
 
-    getAllByStreamsId(streamsIdValue: object[]): Promise<TvShow[]> {
+    getAllByStreamsIds(streamsIdValue: string[]): Promise<TvShow[]> {
         return new Promise(async (resolve, reject) => {
-            await Database.allByWhere(TV_SHOW_NAME_OBJECT, { streams_id: { $in: streamsIdValue } }).then(valueJson => {
+            const _ids = streamsIdValue.map(i => new ObjectId(i))
+            await Database.allByWhere(TV_SHOW_NAME_OBJECT, { streams_id: { $in: _ids } }).then(valueJson => {
                 if (valueJson !== null) {
                     resolve((valueJson as []).map(value => Object.assign(new TvShow(), value)))
                 }
@@ -38,9 +40,10 @@ export default class TvShowDAO implements TvShowRepository, CrudRepository<TvSho
         })
     }
 
-    getAllByCountriesId(countriesIdValue: object[]): Promise<TvShow[]> {
+    getAllByCountriesIds(countriesIdValue: string[]): Promise<TvShow[]> {
         return new Promise(async (resolve, reject) => {
-            await Database.allByWhere(TV_SHOW_NAME_OBJECT, { countries_id: { $in: countriesIdValue } }).then(valueJson => {
+            const _ids = countriesIdValue.map(i => new ObjectId(i))
+            await Database.allByWhere(TV_SHOW_NAME_OBJECT, { countries_id: { $in: _ids } }).then(valueJson => {
                 if (valueJson !== null) {
                     resolve((valueJson as []).map(value => Object.assign(new TvShow(), value)))
                 }
@@ -69,7 +72,7 @@ export default class TvShowDAO implements TvShowRepository, CrudRepository<TvSho
         })
     }
 
-    delete(idDelete: string): Promise<boolean> {
+    deleteById(idDelete: string): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             await Database.deleteByWhere(TV_SHOW_NAME_OBJECT, { _id: new ObjectId(idDelete) }).then(value => {
                 resolve(true)
@@ -79,15 +82,29 @@ export default class TvShowDAO implements TvShowRepository, CrudRepository<TvSho
     }
 
     updateByWhere(data: object, where: object): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
+
+    updateByIds(data: object, ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await Database.updateByWhere(TV_SHOW_NAME_OBJECT, data, where).then(value => {
+            const _ids = ids.map(i => new ObjectId(i))
+            await Database.updateByWhere(TV_SHOW_NAME_OBJECT, data, { _id: { $in: _ids } }).then(value => {
                 resolve(true)
             })
             reject(false)
         })
     }
 
-    open(idOpen: string): Promise<TvShow | null> {
+    updateById(data: object, id: string): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            await Database.updateByWhere(TV_SHOW_NAME_OBJECT, data, { _id: (new ObjectId(id)) }).then(value => {
+                resolve(true)
+            })
+            reject(false)
+        })
+    }
+
+    openById(idOpen: string): Promise<TvShow | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(TV_SHOW_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new TvShow(), value) : null)
@@ -96,9 +113,9 @@ export default class TvShowDAO implements TvShowRepository, CrudRepository<TvSho
         })
     }
 
-    create(titleValue: string, releaseValue: string, resumeValue: string, categoriesIdValue: string[], countriesIdValue: string[], streamsIdValue: string[], userRegister: string | null, reviewedValue: boolean, createdAtValue: string, updatedAtValue?: string): Promise<string> {
+    create(titleValue: string, releaseValue: string, resumeValue: string, categoriesIdValue: string[], countriesIdValue: string[], streamsIdValue: string[], userRegister: string | null, reviewedValue: boolean, createdAtValue: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = TvShowSetObjectDB(titleValue, releaseValue, resumeValue, categoriesIdValue, countriesIdValue, streamsIdValue, (userRegister != null ? new ObjectId(userRegister) : null), reviewedValue, true, createdAtValue, updatedAtValue)
+            const objectDb = TvShowSetObjectDB(titleValue, releaseValue, resumeValue, categoriesIdValue, countriesIdValue, streamsIdValue, (userRegister != null ? new ObjectId(userRegister) : null), reviewedValue, true, createdAtValue)
             await Database.insert(TV_SHOW_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })
