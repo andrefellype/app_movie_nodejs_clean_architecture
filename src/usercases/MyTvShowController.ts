@@ -3,9 +3,6 @@ import { validationResult } from 'express-validator'
 import ConvertData from '../app/core/ConvertData'
 import DataJsonResponse from "../app/core/DataJsonResponse"
 import DataReturnResponse from "../app/core/DataReturnResponse"
-import CategoryDAO from '../data/category/CategoryDAO'
-import CountryDAO from '../data/country/CountryDAO'
-import StreamDAO from '../data/stream/StreamDAO'
 import MyTvShowEpisodeDAO from '../data/myTvShowEpisode/MyTvShowEpisodeDAO'
 import TvShowDAO from '../data/tvShow/TvShowDAO'
 import TvShowSeasonDAO from '../data/tvShowSeason/TvShowSeasonDAO'
@@ -15,8 +12,6 @@ import MyTvShowSeasonNeverWatchDAO from '../data/myTvShowSeasonNeverWatch/MyTvSh
 import MyTvShowNeverWatchDAO from '../data/myTvShowNeverWatch/MyTvShowNeverWatchDAO'
 import { TvShowGetObjectForJson } from '../domain/entity/tvShow/TvShowConst'
 import TvShow from '../domain/entity/tvShow/TvShow'
-import Category from '../domain/entity/category/Category'
-import Stream from '../domain/entity/stream/Stream'
 
 class MyTvShowController {
     public async deleteMyTvShowAllByTvShowId(idsTvShow: string[]) {
@@ -154,7 +149,7 @@ class MyTvShowController {
                         if (posInsert == -1) {
                             await tvShowDAO.openById(valuesJson[v].tv_show_id).then(async valueTvShowJson => {
                                 let tvShowValue = TvShowGetObjectForJson(valueTvShowJson!!, req.userAuth)
-                                await MyTvShowController.getAllDetailsTvShow(req, tvShowValue).then(tsj => {
+                                await MyTvShowController.getAllDetailsTvShow(tvShowValue).then(tsj => {
                                     tvShowValue = tsj
                                 })
                                 tvShows.push({ tvShow: tvShowValue, countEpisodeWatch: 1, percentage: 0 })
@@ -184,47 +179,10 @@ class MyTvShowController {
         })
     }
 
-    private static async getAllDetailsTvShow(req, tvShow) {
-        const categoryDAO = new CategoryDAO()
-        const countryDAO = new CountryDAO()
-        const streamDAO = new StreamDAO()
-
-        const tvShowCategories: Category[] = []
-        if (req.body.object == null || req.body.object.category) {
-            for (let mca = 0; mca < tvShow.categories_id.length; mca++) {
-                await categoryDAO.openById(tvShow.categories_id[mca]).then(valueJsonCategory => {
-                    if (valueJsonCategory!!.status) {
-                        tvShowCategories.push(valueJsonCategory!!)
-                    }
-                })
-            }
-        }
-        tvShow.categories = tvShowCategories
-
-        const tvShowCountries: Category[] = []
-        if (req.body.object == null || req.body.object.country) {
-            for (let mco = 0; mco < tvShow.countries_id.length; mco++) {
-                await countryDAO.openById(tvShow.countries_id[mco]).then(valueJsonCountry => {
-                    if (valueJsonCountry!!.status) {
-                        tvShowCountries.push(valueJsonCountry!!)
-                    }
-                })
-            }
-        }
-        tvShow.countries = tvShowCountries
-
-        const tvShowStreams: Stream[] = []
-        if (req.body.object == null || req.body.object.stream) {
-            for (let ms = 0; ms < tvShow.streams_id.length; ms++) {
-                await streamDAO.openById(tvShow.streams_id[ms]).then(valueJsonStream => {
-                    if (valueJsonStream!!.status) {
-                        tvShowStreams.push(valueJsonStream!!)
-                    }
-                })
-            }
-        }
-        tvShow.streams = tvShowStreams
-
+    private static async getAllDetailsTvShow(tvShow) {
+        tvShow.categories = []
+        tvShow.countries = []
+        tvShow.streams = []
         return tvShow
     }
 }

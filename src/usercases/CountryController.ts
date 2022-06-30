@@ -72,7 +72,7 @@ class CountryController {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const countryDAO = new CountryDAO()
-                countryDAO.updateById({ name: req.body.name, updated_at: ConvertData.getDateNowStr() }, req.body.countryId).then(async valueUpdate => {
+                countryDAO.updateById({ initial: req.body.initial, updated_at: ConvertData.getDateNowStr() }, req.body.countryId).then(async valueUpdate => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
                 }).catch(err => console.log(err))
             }
@@ -100,7 +100,7 @@ class CountryController {
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const countryDAO = new CountryDAO()
-                countryDAO.create(req.body.name, req.userAuth._id, (req.body.reviewed == 1), ConvertData.getDateNowStr()).then(async valueId => {
+                countryDAO.create(req.body.initial, req.userAuth._id, (req.body.reviewed == 1), ConvertData.getDateNowStr()).then(async valueId => {
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, valueId))
                 }).catch(err => console.log(err))
             }

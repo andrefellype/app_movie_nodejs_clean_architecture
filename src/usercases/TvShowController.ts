@@ -64,7 +64,7 @@ class TvShowController {
                         tvShows = tvShows.filter(tvShow => tvShow.reviewed || (tvShow.user_register == req.userAuth._id))
                     }
                     for (let t = 0; t < tvShows.length; t++) {
-                        await TvShowController.getAllDetailsTvShow(req, tvShows[t], true).then(valueTvShow => {
+                        await TvShowController.getAllDetailsTvShow(req, tvShows[t], true, false).then(valueTvShow => {
                             tvShows[t] = valueTvShow
                         })
                     }
@@ -186,6 +186,26 @@ class TvShowController {
         })
     }
 
+    public getTvShowDetailsAll(req: Request, res: Response): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            const errors = validationResult(req)
+            if (!errors.isEmpty()) {
+                DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
+            } else {
+                const tvShowDAO = new TvShowDAO()
+                tvShowDAO.getAllByIds(req.body.tvShowIds).then(async valuesJson => {
+                    let tvShows = valuesJson.map(vj => TvShowGetObjectForJson(vj, req.userAuth))
+                    for (let t = 0; t < tvShows.length; t++) {
+                        await TvShowController.getAllDetailsTvShow(req, tvShows[t]).then(valueTvShow => {
+                            tvShows[t] = valueTvShow
+                        })
+                    }
+                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseArrayJson(res, tvShows))
+                }).catch(err => console.log(err))
+            }
+        })
+    }
+
     public getAll(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
@@ -198,18 +218,13 @@ class TvShowController {
                     if (req.userAuth.level != "ADMIN") {
                         tvShows = tvShows.filter(tvShow => tvShow.reviewed || (tvShow.user_register == req.userAuth._id))
                     }
-                    for (let t = 0; t < tvShows.length; t++) {
-                        await TvShowController.getAllDetailsTvShow(req, tvShows[t]).then(valueTvShow => {
-                            tvShows[t] = valueTvShow
-                        })
-                    }
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseArrayJson(res, tvShows))
                 }).catch(err => console.log(err))
             }
         })
     }
 
-    private static async getAllDetailsTvShow(req, tvShow, validateNotMyTvShow = false) {
+    private static async getAllDetailsTvShow(req, tvShow, validateNotMyTvShow = false, viewDetails = true) {
         const categoryDAO = new CategoryDAO()
         const countryDAO = new CountryDAO()
         const streamDAO = new StreamDAO()
@@ -254,7 +269,7 @@ class TvShowController {
                 })
             }
         }
-        if (!validateNotMyTvShow || statusMyTvShow) {
+        if (viewDetails && (!validateNotMyTvShow || statusMyTvShow)) {
             const tvShowCategories: Category[] = []
             if (req.body.object == null || req.body.object.category) {
                 for (let mca = 0; mca < tvShow.categories_id.length; mca++) {

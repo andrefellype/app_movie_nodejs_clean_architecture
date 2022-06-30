@@ -84,7 +84,7 @@ class MovieController {
                     let movies = valuesJson.map(vj => MovieGetObjectForJson(vj, req.userAuth))
                     movies = movies.filter(movie => movie.reviewed || (movie.user_register == req.userAuth._id))
                     for (let m = 0; m < movies.length; m++) {
-                        await MovieController.getAllDetailsMovie(req, movies[m], true).then(valueMovie => {
+                        await MovieController.getAllDetailsMovie(req, movies[m], true, false).then(valueMovie => {
                             movies[m] = valueMovie
                         })
                     }
@@ -216,6 +216,26 @@ class MovieController {
         })
     }
 
+    public getMovieDetailsAll(req: Request, res: Response): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            const errors = validationResult(req)
+            if (!errors.isEmpty()) {
+                DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
+            } else {
+                const movieDAO = new MovieDAO()
+                movieDAO.getAllByIds(req.body.movieIds).then(async valuesJson => {
+                    let movies = valuesJson.map(vj => MovieGetObjectForJson(vj, req.userAuth))
+                    for (let m = 0; m < movies.length; m++) {
+                        await MovieController.getAllDetailsMovie(req, movies[m]).then(valueMovie => {
+                            movies[m] = valueMovie
+                        })
+                    }
+                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseArrayJson(res, movies))
+                }).catch(err => console.log(err))
+            }
+        })
+    }
+
     public getAll(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
@@ -228,18 +248,13 @@ class MovieController {
                     if (req.userAuth.level != "ADMIN") {
                         movies = movies.filter(movie => movie.reviewed || (movie.user_register == req.userAuth._id))
                     }
-                    for (let m = 0; m < movies.length; m++) {
-                        await MovieController.getAllDetailsMovie(req, movies[m], false).then(valueMovie => {
-                            movies[m] = valueMovie
-                        })
-                    }
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseArrayJson(res, movies))
                 }).catch(err => console.log(err))
             }
         })
     }
 
-    private static async getAllDetailsMovie(req, movie, validateNotMyMovie = false) {
+    private static async getAllDetailsMovie(req, movie, validateNotMyMovie = false, viewDetails = true) {
         const directorDAO = new DirectorDAO()
         const actorDAO = new ActorDAO()
         const categoryDAO = new CategoryDAO()
@@ -264,7 +279,7 @@ class MovieController {
             })
         }
 
-        if (!validateNotMyMovie || statusMyMovie) {
+        if (viewDetails && (!validateNotMyMovie || statusMyMovie)) {
             const movieCategories: Category[] = []
             if (req.body.object == null || req.body.object.category) {
                 for (let mca = 0; mca < movie.categories_id.length; mca++) {

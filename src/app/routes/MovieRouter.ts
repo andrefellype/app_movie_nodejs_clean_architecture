@@ -12,6 +12,7 @@ class MovieRouter {
     public getRoutes(routes: Router) {
         this.routes = routes
         this.getAll()
+        this.getMovieDetailsAll()
         this.create()
         this.openById()
         this.updateById()
@@ -119,6 +120,10 @@ class MovieRouter {
                     throw new Error(err.message)
                 })
             }), body('movieTheater').notEmpty().withMessage("Cinema obrigatório."), this.verifyJWT, MovieController.create)
+    }
+
+    private getMovieDetailsAll() {
+        return this.routes.post('/movie/open/details/all', body('movieIds').notEmpty(), this.verifyJWT, MovieController.getMovieDetailsAll)
     }
 
     private getAll() {

@@ -4,19 +4,9 @@ import ConvertData from '../app/core/ConvertData'
 import DataJsonResponse from "../app/core/DataJsonResponse"
 import DataReturnResponse from "../app/core/DataReturnResponse"
 import MovieDAO from '../data/movie/MovieDAO'
-import DirectorDAO from '../data/director/DirectorDAO'
-import ActorDAO from '../data/actor/ActorDAO'
-import CategoryDAO from '../data/category/CategoryDAO'
-import CountryDAO from '../data/country/CountryDAO'
-import StreamDAO from '../data/stream/StreamDAO'
 import MyMovieDAO from '../data/myMovie/MyMovieDAO'
 import { MyMovieGetObjectForJson } from '../domain/entity/myMovie/MyMovieConst'
 import MyMovieNeverWatchDAO from '../data/myMovieNeverWatch/MyMovieNeverWatchDAO'
-import Category from '../domain/entity/category/Category'
-import Director from '../domain/entity/director/Director'
-import Actor from '../domain/entity/actor/Actor'
-import Country from '../domain/entity/country/Country'
-import Stream from '../domain/entity/stream/Stream'
 
 class MyMovieController {
     public async deleteMyMovieAllByMovieId(idsMovie: string[]) {
@@ -95,8 +85,8 @@ class MyMovieController {
                     const myMovies = valuesJson.map(vj => MyMovieGetObjectForJson(vj))
                     for (let m = 0; m < myMovies.length; m++) {
                         await movieDAO.openById(myMovies[m].movie_id).then(async movieJson => {
-                            if (movieJson != null) {
-                                await MyMovieController.getAllDetailsMovie(req, movieJson).then(valueMovie => {
+                            if (typeof movieJson !== "undefined" && movieJson != null) {
+                                await MyMovieController.getAllDetailsMovie(movieJson).then(valueMovie => {
                                     myMovies[m].movie = valueMovie
                                 })
                             }
@@ -108,73 +98,12 @@ class MyMovieController {
         })
     }
 
-    private static async getAllDetailsMovie(req, movie) {
-        const directorDAO = new DirectorDAO()
-        const actorDAO = new ActorDAO()
-        const categoryDAO = new CategoryDAO()
-        const countryDAO = new CountryDAO()
-        const streamDAO = new StreamDAO()
-
-        const movieCategories: Category[] = []
-        if (req.body.object == null || req.body.object.category) {
-            for (let mca = 0; mca < movie.categories_id.length; mca++) {
-                await categoryDAO.openById(movie.categories_id[mca]).then(valueJsonCategory => {
-                    if (valueJsonCategory!!.status) {
-                        movieCategories.push(valueJsonCategory!!)
-                    }
-                })
-            }
-        }
-        movie.categories = movieCategories
-
-        const movieDirectors: Director[] = []
-        if (req.body.object == null || req.body.object.director) {
-            for (let md = 0; md < movie.directors_id.length; md++) {
-                await directorDAO.openById(movie.directors_id[md]).then(valueJsonDirector => {
-                    if (valueJsonDirector!!.status) {
-                        movieDirectors.push(valueJsonDirector!!)
-                    }
-                })
-            }
-        }
-        movie.directors = movieDirectors
-
-        const movieCasts: Actor[] = []
-        if (req.body.object == null || req.body.object.cast) {
-            for (let mc = 0; mc < movie.casts_id.length; mc++) {
-                await actorDAO.openById(movie.casts_id[mc]).then(valueJsonActor => {
-                    if (valueJsonActor!!.status) {
-                        movieCasts.push(valueJsonActor!!)
-                    }
-                })
-            }
-        }
-        movie.casts = movieCasts
-
-        const movieCountries: Country[] = []
-        if (req.body.object == null || req.body.object.country) {
-            for (let mco = 0; mco < movie.countries_id.length; mco++) {
-                await countryDAO.openById(movie.countries_id[mco]).then(valueJsonCountry => {
-                    if (valueJsonCountry!!.status) {
-                        movieCountries.push(valueJsonCountry!!)
-                    }
-                })
-            }
-        }
-        movie.countries = movieCountries
-
-        const movieStreams: Stream[] = []
-        if (req.body.object == null || req.body.object.stream) {
-            for (let ms = 0; ms < movie.streams_id.length; ms++) {
-                await streamDAO.openById(movie.streams_id[ms]).then(valueJsonStream => {
-                    if (valueJsonStream!!.status) {
-                        movieStreams.push(valueJsonStream!!)
-                    }
-                })
-            }
-        }
-        movie.streams = movieStreams
-
+    private static async getAllDetailsMovie(movie) {
+        movie.categories = []
+        movie.directors = []
+        movie.casts = []
+        movie.countries = []
+        movie.streams = []
         return movie
     }
 }

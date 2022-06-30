@@ -12,6 +12,7 @@ class TvShowRouter {
     public getRoutes(routes: Router) {
         this.routes = routes
         this.getAll()
+        this.getTvShowDetailsAll()
         this.create()
         this.openById()
         this.updateById()
@@ -79,6 +80,10 @@ class TvShowRouter {
                     throw new Error(err.message)
                 })
             }), body('release').notEmpty().withMessage("Lançamento obrigatório."), this.verifyJWT, TvShowController.create)
+    }
+
+    private getTvShowDetailsAll() {
+        return this.routes.post('/tvshow/open/details/all', body('tvShowIds').notEmpty(), this.verifyJWT, TvShowController.getTvShowDetailsAll)
     }
 
     private getAll() {

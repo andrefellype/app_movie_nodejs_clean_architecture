@@ -34,25 +34,26 @@ class CountryRouter {
 
     private updateById() {
         const countryDAO = new CountryDAO()
-        return this.routes.post('/country/update', body('countryId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.").custom(async (value, { req }) => {
-            return new Promise((resolve, reject) => {
-                if (req.body.countryId != null && req.body.countryId.length > 0) {
-                    countryDAO.openByName(value).then((valueJson) => {
-                        if (valueJson != null && valueJson._id != req.body.countryId) {
-                            DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
-                        } else {
-                            DataReturnResponse.returnResolve(resolve, true)
-                        }
-                    }).catch(err => {
-                        DataReturnResponse.returnReject(reject, new Error(err.message))
-                    })
-                } else {
-                    DataReturnResponse.returnResolve(resolve, true)
-                }
-            }).catch(err => {
-                throw new Error(err.message)
-            })
-        }), this.verifyJWT, CountryController.updateById)
+        return this.routes.post('/country/update', body('countryId').notEmpty(), body('initial').notEmpty().withMessage("Nome obrigatório.")
+            .isLength({ max: 3 }).withMessage("O nome deve ter conter no máximo 3 caracteres.").custom(async (value, { req }) => {
+                return new Promise((resolve, reject) => {
+                    if (req.body.countryId != null && req.body.countryId.length > 0) {
+                        countryDAO.openByInitial(value).then((valueJson) => {
+                            if (valueJson != null && valueJson._id != req.body.countryId) {
+                                DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
+                            } else {
+                                DataReturnResponse.returnResolve(resolve, true)
+                            }
+                        }).catch(err => {
+                            DataReturnResponse.returnReject(reject, new Error(err.message))
+                        })
+                    } else {
+                        DataReturnResponse.returnResolve(resolve, true)
+                    }
+                }).catch(err => {
+                    throw new Error(err.message)
+                })
+            }), this.verifyJWT, CountryController.updateById)
     }
 
     private openById() {
@@ -61,10 +62,10 @@ class CountryRouter {
 
     private create() {
         const countryDAO = new CountryDAO()
-        return this.routes.post('/country/register', body('reviewed').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.")
-            .custom(async (value) => {
+        return this.routes.post('/country/register', body('reviewed').notEmpty(), body('initial').notEmpty().withMessage("Nome obrigatório.")
+            .isLength({ max: 3 }).withMessage("O nome deve ter conter no máximo 3 caracteres.").custom(async (value) => {
                 return new Promise((resolve, reject) => {
-                    countryDAO.openByName(value).then((valueJson) => {
+                    countryDAO.openByInitial(value).then((valueJson) => {
                         if (valueJson != null) {
                             DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
                         } else {

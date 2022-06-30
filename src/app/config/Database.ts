@@ -14,6 +14,19 @@ export default class Database {
         return client
     }
 
+    public static updateNameFieldByObject(nameObject: string, namesUpdate: object = {}) {
+        return new Promise(async (resolve, reject) => {
+            const connection = await this.connectDb()
+            await connection.connect()
+            const database = await connection.db(this.databaseDb)
+            const collection = await database.collection(nameObject)
+            await collection.updateMany({}, { $rename: namesUpdate }).then(async value => {
+                await connection.close()
+                DataReturnResponse.returnResolve(resolve, value.modifiedCount)
+            })
+        })
+    }
+
     public static removeFields(nameObject: string, fields = {}) {
         return new Promise(async (resolve, reject) => {
             const connection = await this.connectDb()
