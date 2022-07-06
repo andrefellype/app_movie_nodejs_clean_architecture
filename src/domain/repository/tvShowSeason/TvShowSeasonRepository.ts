@@ -1,10 +1,15 @@
 import TvShowSeason from "../../entity/tvShowSeason/TvShowSeason"
 
 export default interface TvShowSeasonRepository {
-    getAllIdsByTvShowIdAndStatus(tvShowId: string, statusValue: boolean): Promise<TvShowSeason[]>
-    getAllByTvShowIds(tvShowIds: string[]): Promise<TvShowSeason[]>
+    findAllIdsByTvShowIdAndStatus(tvShowId: string, statusValue: boolean): Promise<TvShowSeason[]>
+
+    findAllByTvShowIds(tvShowIds: string[]): Promise<TvShowSeason[]>
+
     deleteAllByIds(ids: string[]): Promise<boolean>
-    getAllByIds(ids: string[]): Promise<TvShowSeason[]>
-    openByNameAndTvShowId(nameValue: string, tvShowId: string): Promise<TvShowSeason | null>
-    getAllByTvShowIdAndStatus(tvShowId: string, statusValue: boolean): Promise<TvShowSeason[]>
+
+    findAllByIds(ids: string[]): Promise<TvShowSeason[]>
+
+    findByNameAndTvShowId(nameValue: string, tvShowId: string): Promise<TvShowSeason | null>
+    
+    findAllByTvShowIdAndStatus(tvShowId: string, statusValue: boolean): Promise<TvShowSeason[]>
 }

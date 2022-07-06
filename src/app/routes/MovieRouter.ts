@@ -11,40 +11,40 @@ class MovieRouter {
 
     public getRoutes(routes: Router) {
         this.routes = routes
-        this.getAll()
-        this.getMovieDetailsAll()
+        this.openAll()
+        this.openMovieDetailAll()
         this.create()
         this.openById()
         this.updateById()
         this.updateApprovedById()
         this.deleteById()
-        this.deleteSeveralByIds()
-        this.getAllByNotMyMovie()
+        this.deleteAllByIds()
+        this.openAllByNotMyMovie()
     }
 
-    private getAllByNotMyMovie() {
-        return this.routes.post('/movie/open/all/notmymovie', this.verifyJWT, MovieController.getAllByNotMyMovie)
+    private openAllByNotMyMovie() {
+        return this.routes.get('/movie/notmymovie/open', this.verifyJWT, MovieController.openAllByNotMyMovie)
     }
 
-    private deleteSeveralByIds() {
-        return this.routes.post('/movie/delete/several', body('_ids').notEmpty(), this.verifyJWT, MovieController.deleteSeveralByIds)
+    private deleteAllByIds() {
+        return this.routes.put('/movie/delete', body('movieId').notEmpty(), this.verifyJWT, MovieController.deleteById)
     }
 
     private deleteById() {
-        return this.routes.post('/movie/delete', body('movieId').notEmpty(), this.verifyJWT, MovieController.deleteById)
+        return this.routes.delete('/movie/delete/:movieId', this.verifyJWT, MovieController.deleteById)
     }
 
     private updateApprovedById() {
-        return this.routes.post('/movie/approved/reviewed', body('movieId').notEmpty(), this.verifyJWT, MovieController.updateApprovedById)
+        return this.routes.get('/movie/approved/:movieId', this.verifyJWT, MovieController.updateApprovedById)
     }
 
     private updateById() {
         const movieDAO = new MovieDAO()
-        return this.routes.post('/movie/update', body('movieId').notEmpty(), body('title').notEmpty().withMessage("Título obrigatório.")
+        return this.routes.put('/movie/update/:movieId', body('title').notEmpty().withMessage("Título obrigatório.")
             .custom(async (value, { req }) => {
                 return new Promise((resolve, reject) => {
-                    movieDAO.openByTitle(value).then((valueJson) => {
-                        if (valueJson != null && valueJson._id != req.body.movieId) {
+                    movieDAO.findByTitle(value).then((valueJson) => {
+                        if (valueJson != null && valueJson._id != req.params!!.movieId) {
                             DataReturnResponse.returnReject(reject, new Error('Título já existente.'))
                         } else {
                             DataReturnResponse.returnResolve(resolve, true)
@@ -79,7 +79,7 @@ class MovieRouter {
     }
 
     private openById() {
-        return this.routes.post('/movie/open', body('movieId').notEmpty(), this.verifyJWT, MovieController.openById)
+        return this.routes.get('/movie/open/:movieId', this.verifyJWT, MovieController.openById)
     }
 
     private create() {
@@ -87,7 +87,7 @@ class MovieRouter {
         return this.routes.post('/movie/register', body('title').notEmpty().withMessage("Título obrigatório.")
             .custom(async (value) => {
                 return new Promise((resolve, reject) => {
-                    movieDAO.openByTitle(value).then((valueJson) => {
+                    movieDAO.findByTitle(value).then((valueJson) => {
                         if (valueJson != null) {
                             DataReturnResponse.returnReject(reject, new Error('Título já existente.'))
                         } else {
@@ -122,12 +122,13 @@ class MovieRouter {
             }), body('movieTheater').notEmpty().withMessage("Cinema obrigatório."), this.verifyJWT, MovieController.create)
     }
 
-    private getMovieDetailsAll() {
-        return this.routes.post('/movie/open/details/all', body('movieIds').notEmpty(), this.verifyJWT, MovieController.getMovieDetailsAll)
+    private openMovieDetailAll() {
+        return this.routes.post('/movie/open/details/all', body('movieIds').notEmpty(), this.verifyJWT,
+            MovieController.openMovieDetailAll)
     }
 
-    private getAll() {
-        return this.routes.post('/movie/open/all', this.verifyJWT, MovieController.getAll)
+    private openAll() {
+        return this.routes.get('/movie/open', this.verifyJWT, MovieController.openAll)
     }
 
     private verifyJWT(req, res, next) {

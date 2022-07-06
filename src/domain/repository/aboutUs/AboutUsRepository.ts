@@ -2,6 +2,8 @@ import AboutUs from "../../entity/aboutUs/AboutUs"
 
 export default interface AboutUsRepository {
     deleteAll(): Promise<boolean>
-    update(data: object): Promise<boolean>
-    openLast(): Promise<AboutUs | null>
+
+    updateAll(data: object): Promise<boolean>
+    
+    findLast(): Promise<AboutUs | null>
 }

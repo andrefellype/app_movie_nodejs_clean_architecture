@@ -12,6 +12,10 @@ import TvShowSeasonRouter from './TvShowSeasonRouter'
 import TvShowEpisodeRouter from './TvShowEpisodeRouter'
 import MyMovieRouter from './MyMovieRouter'
 import MyTvShowRouter from './MyTvShowRouter'
+import MyMovieNeverWatchRouter from './MyMovieNeverWatchRouter'
+import MyTvShowEpisodeNeverWatchRouter from './MyTvShowEpisodeNeverWatchRouter'
+import MyTvShowSeasonNeverWatchRouter from './MyTvShowSeasonNeverWatchRouter'
+import MyTvShowNeverWatchRouter from './MyTvShowNeverWatchRouter'
 
 const routes = Router()
 
@@ -31,6 +35,10 @@ TvShowRouter.getRoutes(routes)
 TvShowSeasonRouter.getRoutes(routes)
 TvShowEpisodeRouter.getRoutes(routes)
 MyMovieRouter.getRoutes(routes)
+MyMovieNeverWatchRouter.getRoutes(routes)
 MyTvShowRouter.getRoutes(routes)
+MyTvShowEpisodeNeverWatchRouter.getRoutes(routes)
+MyTvShowSeasonNeverWatchRouter.getRoutes(routes)
+MyTvShowNeverWatchRouter.getRoutes(routes)
 
 export default routes

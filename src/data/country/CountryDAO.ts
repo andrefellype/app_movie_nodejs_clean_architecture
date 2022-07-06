@@ -3,7 +3,7 @@ import Database from "../../app/config/Database"
 import CrudRepository from "../../domain/repository/CrudRepository"
 import Country from "../../domain/entity/country/Country"
 import CountryRepository from "../../domain/repository/country/CountryRepository"
-import { CountrySetObjectDB, COUNTRY_NAME_OBJECT } from "../../domain/entity/country/CountryConst"
+import { SetCountryDB, COUNTRY_NAME_OBJECT } from "../../domain/entity/country/CountryConst"
 
 export default class CountryDAO implements CountryRepository, CrudRepository<Country> {
     deleteAllByIds(ids: string[]): Promise<boolean> {
@@ -16,7 +16,7 @@ export default class CountryDAO implements CountryRepository, CrudRepository<Cou
         })
     }
 
-    getAllByIds(ids: string[]): Promise<Country[]> {
+    findAllByIds(ids: string[]): Promise<Country[]> {
         return new Promise(async (resolve, reject) => {
             const _ids = ids.map(i => new ObjectId(i))
             await Database.allByWhere(COUNTRY_NAME_OBJECT, { _id: { $in: _ids } }).then(valueJson => {
@@ -28,7 +28,7 @@ export default class CountryDAO implements CountryRepository, CrudRepository<Cou
         })
     }
 
-    openByInitial(initialValue: string): Promise<Country | null> {
+    findByInitial(initialValue: string): Promise<Country | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(COUNTRY_NAME_OBJECT, { initial: initialValue }).then(value => {
                 resolve(value != null ? Object.assign(new Country(), value) : null)
@@ -37,7 +37,7 @@ export default class CountryDAO implements CountryRepository, CrudRepository<Cou
         })
     }
 
-    getAllByStatus(statusValue: boolean): Promise<Country[]> {
+    findAllByStatus(statusValue: boolean): Promise<Country[]> {
         return new Promise(async (resolve, reject) => {
             await Database.allByWhere(COUNTRY_NAME_OBJECT, { status: statusValue }).then(valueJson => {
                 if (valueJson !== null) {
@@ -80,7 +80,7 @@ export default class CountryDAO implements CountryRepository, CrudRepository<Cou
         })
     }
 
-    openById(idOpen: string): Promise<Country | null> {
+    find(idOpen: string): Promise<Country | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(COUNTRY_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new Country(), value) : null)
@@ -91,7 +91,7 @@ export default class CountryDAO implements CountryRepository, CrudRepository<Cou
 
     create(initialValue: string, userRegister: string, reviewedValue: boolean, createdAtValue: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = CountrySetObjectDB(initialValue, (new ObjectId(userRegister)), reviewedValue, true, createdAtValue)
+            const objectDb = SetCountryDB(initialValue, (new ObjectId(userRegister)), reviewedValue, true, createdAtValue)
             await Database.insert(COUNTRY_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })
@@ -99,7 +99,7 @@ export default class CountryDAO implements CountryRepository, CrudRepository<Cou
         })
     }
 
-    getAll(): Promise<Country[]> {
+    findAll(): Promise<Country[]> {
         throw new Error("Method not implemented.")
     }
 }

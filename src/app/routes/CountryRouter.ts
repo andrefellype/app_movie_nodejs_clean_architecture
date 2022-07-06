@@ -11,53 +11,56 @@ class CountryRouter {
 
     public getRoutes(routes: Router) {
         this.routes = routes
-        this.getAll()
+        this.openAll()
+        this.openAllByAuthorized()
         this.create()
         this.openById()
         this.updateById()
         this.updateApprovedById()
         this.deleteById()
-        this.deleteSeveralByIds()
+        this.deleteAllByIds()
     }
 
-    private deleteSeveralByIds() {
-        return this.routes.post('/country/delete/several', body('_ids').notEmpty(), this.verifyJWT, CountryController.deleteSeveralByIds)
+    private deleteAllByIds() {
+        return this.routes.put('/country/delete', body('countryId').notEmpty(), this.verifyJWT, CountryController.deleteById)
     }
 
     private deleteById() {
-        return this.routes.post('/country/delete', body('countryId').notEmpty(), this.verifyJWT, CountryController.deleteById)
+        return this.routes.delete('/country/delete/:countryId', this.verifyJWT, CountryController.deleteById)
     }
 
     private updateApprovedById() {
-        return this.routes.post('/country/approved/reviewed', body('countryId').notEmpty(), this.verifyJWT, CountryController.updateApprovedById)
+        return this.routes.get('/country/approved/:countryId', this.verifyJWT, CountryController.updateApprovedById)
     }
 
     private updateById() {
         const countryDAO = new CountryDAO()
-        return this.routes.post('/country/update', body('countryId').notEmpty(), body('initial').notEmpty().withMessage("Nome obrigatório.")
-            .isLength({ max: 3 }).withMessage("O nome deve ter conter no máximo 3 caracteres.").custom(async (value, { req }) => {
-                return new Promise((resolve, reject) => {
-                    if (req.body.countryId != null && req.body.countryId.length > 0) {
-                        countryDAO.openByInitial(value).then((valueJson) => {
-                            if (valueJson != null && valueJson._id != req.body.countryId) {
-                                DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
-                            } else {
-                                DataReturnResponse.returnResolve(resolve, true)
-                            }
-                        }).catch(err => {
-                            DataReturnResponse.returnReject(reject, new Error(err.message))
-                        })
-                    } else {
-                        DataReturnResponse.returnResolve(resolve, true)
-                    }
-                }).catch(err => {
-                    throw new Error(err.message)
-                })
-            }), this.verifyJWT, CountryController.updateById)
+        return this.routes.put('/country/update/:countryId',
+            body('initial').notEmpty().withMessage("Nome obrigatório.")
+                .isLength({ max: 3 }).withMessage("O nome deve ter conter no máximo 3 caracteres.")
+                .custom(async (value, { req }) => {
+                    return new Promise((resolve, reject) => {
+                        if (req.params!!.countryId != null && req.params!!.countryId.length > 0) {
+                            countryDAO.findByInitial(value).then((valueJson) => {
+                                if (valueJson != null && valueJson._id != req.params!!.countryId) {
+                                    DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
+                                } else {
+                                    DataReturnResponse.returnResolve(resolve, true)
+                                }
+                            }).catch(err => {
+                                DataReturnResponse.returnReject(reject, new Error(err.message))
+                            })
+                        } else {
+                            DataReturnResponse.returnResolve(resolve, true)
+                        }
+                    }).catch(err => {
+                        throw new Error(err.message)
+                    })
+                }), this.verifyJWT, CountryController.updateById)
     }
 
     private openById() {
-        return this.routes.post('/country/open', body('countryId').notEmpty(), this.verifyJWT, CountryController.openById)
+        return this.routes.get('/country/open/:countryId', this.verifyJWT, CountryController.openById)
     }
 
     private create() {
@@ -65,7 +68,7 @@ class CountryRouter {
         return this.routes.post('/country/register', body('reviewed').notEmpty(), body('initial').notEmpty().withMessage("Nome obrigatório.")
             .isLength({ max: 3 }).withMessage("O nome deve ter conter no máximo 3 caracteres.").custom(async (value) => {
                 return new Promise((resolve, reject) => {
-                    countryDAO.openByInitial(value).then((valueJson) => {
+                    countryDAO.findByInitial(value).then((valueJson) => {
                         if (valueJson != null) {
                             DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
                         } else {
@@ -80,8 +83,12 @@ class CountryRouter {
             }), this.verifyJWT, CountryController.create)
     }
 
-    private getAll() {
-        return this.routes.post('/country/open/all', body('listGeneral').notEmpty(), this.verifyJWT, CountryController.getAll)
+    private openAllByAuthorized() {
+        return this.routes.get('/country/open/authorized', this.verifyJWT, CountryController.openAllByAuthorized)
+    }
+
+    private openAll() {
+        return this.routes.get('/country/open', this.verifyJWT, CountryController.openAll)
     }
 
     private verifyJWT(req, res, next) {

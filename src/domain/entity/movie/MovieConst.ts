@@ -2,7 +2,7 @@ import Movie from "./Movie"
 
 export const MOVIE_NAME_OBJECT = "movies"
 
-export function MovieSetObjectDB(
+export function SetMovieDB(
     titleValue: string, releaseValue: string, durationValue: string, movie_theaterValue: boolean, resume: string, categoriesIdValue: object[],
     directorsIdValue: object[], castsIdValue: object[], countriesIdValue: object[], streamsIdValue: object[], userRegister: object | null,
     reviewedValue: boolean, statusValue: boolean, createdAtValue: string
@@ -26,7 +26,7 @@ export function MovieSetObjectDB(
     }
 }
 
-export function MovieGetObjectForJson(movie: Movie, user?: any) {
+export function GetMovieByJson(movie: Movie, user?: any) {
     return {
         _id: movie._id,
         title: movie.title,

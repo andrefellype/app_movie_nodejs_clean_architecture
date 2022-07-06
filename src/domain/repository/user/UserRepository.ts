@@ -1,9 +1,13 @@
 import User from "../../entity/user/User"
 
 export default interface UserRepository {
-    allByNotIdAndStatus(userIdValue: string, statusValue?: boolean): Promise<User[]>
-    openByCodeRecovery(codeRecoveryValue: string): Promise<User | null>
-    openByCellphoneAndPassword(cellphoneValue: string, passwordValue: string): Promise<User | null>
-    openByEmail(emailValue: string): Promise<User | null>
-    openByCellphone(cellphoneValue: string): Promise<User | null>
+    findAllByNotIdAndStatus(userIdValue: string, statusValue?: boolean): Promise<User[]>
+
+    findByCodeRecovery(codeRecoveryValue: string): Promise<User | null>
+
+    findByCellphoneAndPassword(cellphoneValue: string, passwordValue: string): Promise<User | null>
+    
+    findByEmail(emailValue: string): Promise<User | null>
+    
+    findByCellphone(cellphoneValue: string): Promise<User | null>
 }

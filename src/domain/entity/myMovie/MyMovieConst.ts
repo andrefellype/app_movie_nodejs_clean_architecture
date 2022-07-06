@@ -2,7 +2,7 @@ import MyMovie from "./MyMovie"
 
 export const MY_MOVIES_NAME_OBJECT = "my_movies"
 
-export function MyMovieSetObjectDB(userId: object, movieIdValue: object, createdAtValue: string) {
+export function SetMyMovieDB(userId: object, movieIdValue: object, createdAtValue: string) {
     return {
         user_id: userId,
         movie_id: movieIdValue,
@@ -11,7 +11,7 @@ export function MyMovieSetObjectDB(userId: object, movieIdValue: object, created
     }
 }
 
-export function MyMovieGetObjectForJson(myMovie: MyMovie) {
+export function GetMyMovieByJson(myMovie: MyMovie) {
     return {
         _id: myMovie._id,
         user_id: myMovie.user_id,

@@ -11,76 +11,83 @@ class DirectorRouter {
 
     public getRoutes(routes: Router) {
         this.routes = routes
-        this.getAll()
+        this.openAll()
+        this.openAllByAuthorized()
         this.create()
         this.openById()
         this.updateById()
         this.updateApprovedById()
         this.deleteById()
-        this.deleteSeveralByIds()
+        this.deleteAllByIds()
     }
 
-    private deleteSeveralByIds() {
-        return this.routes.post('/director/delete/several', body('_ids').notEmpty(), this.verifyJWT, DirectorController.deleteSeveralByIds)
+    private deleteAllByIds() {
+        return this.routes.put('/director/delete', body('directorId').notEmpty(), this.verifyJWT, DirectorController.deleteById)
     }
 
     private deleteById() {
-        return this.routes.post('/director/delete', body('directorId').notEmpty(), this.verifyJWT, DirectorController.deleteById)
+        return this.routes.delete('/director/delete/:directorId', this.verifyJWT, DirectorController.deleteById)
     }
 
     private updateApprovedById() {
-        return this.routes.post('/director/approved/reviewed', body('directorId').notEmpty(), this.verifyJWT, DirectorController.updateApprovedById)
+        return this.routes.get('/director/approved/:directorId', this.verifyJWT, DirectorController.updateApprovedById)
     }
 
     private updateById() {
         const directorDAO = new DirectorDAO()
-        return this.routes.post('/director/update', body('directorId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.").custom(async (value, { req }) => {
-            return new Promise((resolve, reject) => {
-                if (req.body.directorId != null && req.body.directorId.length > 0) {
-                    directorDAO.openByName(value).then((valueJson) => {
-                        if (valueJson != null && valueJson._id != req.body.directorId) {
-                            DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
-                        } else {
-                            DataReturnResponse.returnResolve(resolve, true)
-                        }
-                    }).catch(err => {
-                        DataReturnResponse.returnReject(reject, new Error(err.message))
-                    })
-                } else {
-                    DataReturnResponse.returnResolve(resolve, true)
-                }
-            }).catch(err => {
-                throw new Error(err.message)
-            })
-        }), this.verifyJWT, DirectorController.updateById)
+        return this.routes.put('/director/update/:directorId', body('name')
+            .notEmpty().withMessage("Nome obrigatório.").custom(async (value, { req }) => {
+                return new Promise((resolve, reject) => {
+                    if (req.params!!.directorId != null && req.params!!.directorId.length > 0) {
+                        directorDAO.findByName(value).then((valueJson) => {
+                            if (valueJson != null && valueJson._id != req.params!!.directorId) {
+                                DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
+                            } else {
+                                DataReturnResponse.returnResolve(resolve, true)
+                            }
+                        }).catch(err => {
+                            DataReturnResponse.returnReject(reject, new Error(err.message))
+                        })
+                    } else {
+                        DataReturnResponse.returnResolve(resolve, true)
+                    }
+                }).catch(err => {
+                    throw new Error(err.message)
+                })
+            }), this.verifyJWT, DirectorController.updateById)
     }
 
     private openById() {
-        return this.routes.post('/director/open', body('directorId').notEmpty(), this.verifyJWT, DirectorController.openById)
+        return this.routes.get('/director/open/:directorId', this.verifyJWT, DirectorController.openById)
     }
 
     private create() {
         const directorDAO = new DirectorDAO()
-        return this.routes.post('/director/register', body('reviewed').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.")
-            .custom(async (value) => {
-                return new Promise((resolve, reject) => {
-                    directorDAO.openByName(value).then((valueJson) => {
-                        if (valueJson != null) {
-                            DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
-                        } else {
-                            DataReturnResponse.returnResolve(resolve, true)
-                        }
+        return this.routes.post('/director/register', body('reviewed').notEmpty(),
+            body('name').notEmpty().withMessage("Nome obrigatório.")
+                .custom(async (value) => {
+                    return new Promise((resolve, reject) => {
+                        directorDAO.findByName(value).then((valueJson) => {
+                            if (valueJson != null) {
+                                DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
+                            } else {
+                                DataReturnResponse.returnResolve(resolve, true)
+                            }
+                        }).catch(err => {
+                            DataReturnResponse.returnReject(reject, new Error(err.message))
+                        })
                     }).catch(err => {
-                        DataReturnResponse.returnReject(reject, new Error(err.message))
+                        throw new Error(err.message)
                     })
-                }).catch(err => {
-                    throw new Error(err.message)
-                })
-            }), this.verifyJWT, DirectorController.create)
+                }), this.verifyJWT, DirectorController.create)
     }
 
-    private getAll() {
-        return this.routes.post('/director/open/all', body('listGeneral').notEmpty(), this.verifyJWT, DirectorController.getAll)
+    private openAllByAuthorized() {
+        return this.routes.get('/director/open/authorized', this.verifyJWT, DirectorController.openAllByAuthorized)
+    }
+
+    private openAll() {
+        return this.routes.get('/director/open', this.verifyJWT, DirectorController.openAll)
     }
 
     private verifyJWT(req, res, next) {

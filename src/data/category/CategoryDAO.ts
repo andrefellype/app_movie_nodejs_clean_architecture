@@ -3,10 +3,10 @@ import Database from "../../app/config/Database"
 import Category from "../../domain/entity/category/Category"
 import CategoryRepository from "../../domain/repository/category/CategoryRepository"
 import CrudRepository from "../../domain/repository/CrudRepository"
-import { CategorySetObjectDB, CATEGORY_NAME_OBJECT } from "../../domain/entity/category/CategoryConst"
+import { SetCategoryDB, CATEGORY_NAME_OBJECT } from "../../domain/entity/category/CategoryConst"
 
 export default class CategoryDAO implements CategoryRepository, CrudRepository<Category> {
-    openByName(nameValue: string): Promise<Category | null> {
+    findByName(nameValue: string): Promise<Category | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(CATEGORY_NAME_OBJECT, { name: nameValue }).then(value => {
                 resolve(value != null ? Object.assign(new Category(), value) : null)
@@ -15,7 +15,7 @@ export default class CategoryDAO implements CategoryRepository, CrudRepository<C
         })
     }
 
-    getAllByStatus(statusValue: boolean): Promise<Category[]> {
+    findAllByStatus(statusValue: boolean): Promise<Category[]> {
         return new Promise(async (resolve, reject) => {
             await Database.allByWhere(CATEGORY_NAME_OBJECT, { status: statusValue }).then(valueJson => {
                 if (valueJson !== null) {
@@ -34,7 +34,7 @@ export default class CategoryDAO implements CategoryRepository, CrudRepository<C
             reject(null)
         })
     }
-    
+
     updateByWhere(data: object, where: object): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
@@ -42,7 +42,7 @@ export default class CategoryDAO implements CategoryRepository, CrudRepository<C
     updateByIds(data: object, ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             const _ids = ids.map(i => new ObjectId(i))
-            await Database.updateByWhere(CATEGORY_NAME_OBJECT, data, { _id: { $in: _ids }}).then(value => {
+            await Database.updateByWhere(CATEGORY_NAME_OBJECT, data, { _id: { $in: _ids } }).then(value => {
                 resolve(true)
             })
             reject(false)
@@ -58,7 +58,7 @@ export default class CategoryDAO implements CategoryRepository, CrudRepository<C
         })
     }
 
-    openById(idOpen: string): Promise<Category | null> {
+    find(idOpen: string): Promise<Category | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(CATEGORY_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new Category(), value) : null)
@@ -69,7 +69,7 @@ export default class CategoryDAO implements CategoryRepository, CrudRepository<C
 
     create(nameValue: string, createdAtValue: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = CategorySetObjectDB(nameValue, true, createdAtValue)
+            const objectDb = SetCategoryDB(nameValue, true, createdAtValue)
             await Database.insert(CATEGORY_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })
@@ -77,7 +77,7 @@ export default class CategoryDAO implements CategoryRepository, CrudRepository<C
         })
     }
 
-    getAll(): Promise<Category[]> {
+    findAll(): Promise<Category[]> {
         throw new Error("Method not implemented.")
     }
 }

@@ -2,7 +2,7 @@ import User from "./user"
 
 export const USER_NAME_OBJECT = "users"
 
-export function UserSetObjectDB(
+export function SetUserDB(
     nameValue: string, birthValue: string, emailValue: string, cellphoneValue: string, passwordValue: string, levelValue: string, codeRecoveryValue: string | null, enabledValue: boolean, statusValue: boolean,
     createdAtValue: string, lastAccessAtValue: string | null = null
 ) {
@@ -22,7 +22,7 @@ export function UserSetObjectDB(
     }
 }
 
-export function UserGetObjectForJson(user: User, token?: String) {
+export function GetUserByJson(user: User, token?: String) {
     return {
         _id: user._id,
         name: user.name,

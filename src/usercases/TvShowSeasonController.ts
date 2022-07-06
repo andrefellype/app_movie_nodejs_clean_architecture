@@ -8,26 +8,29 @@ import MyTvShowEpisodeNeverWatchDAO from '../data/myTvShowEpisodeNeverWatch/MyTv
 import MyTvShowSeasonNeverWatchDAO from '../data/myTvShowSeasonNeverWatch/MyTvShowSeasonNeverWatchDAO'
 import TvShowEpisodeDAO from '../data/tvShowEpisode/TvShowEpisodeDAO'
 import TvShowSeasonDAO from '../data/tvShowSeason/TvShowSeasonDAO'
-import { TvShowSeasonGetObjectForJson } from '../domain/entity/tvShowSeason/TvShowSeasonConst'
-import MyTvShowController from './MyTvShowController'
+import { GetTvShowSeasonByJson } from '../domain/entity/tvShowSeason/TvShowSeasonConst'
+import MyTvShowEpisodeController from './MyTvShowEpisodeController'
+import MyTvShowEpisodeNeverWatchController from './MyTvShowEpisodeNeverWatchController'
+import MyTvShowSeasonNeverWatchController from './MyTvShowSeasonNeverWatchController'
 import TvShowEpisodeController from './TvShowEpisodeController'
 
 class TvShowSeasonController {
     public async deleteSeasonAllByTvShowId(tvShowIds: string[]) {
         const tvShowSeasonDAO = new TvShowSeasonDAO()
-        await tvShowSeasonDAO.getAllByTvShowIds(tvShowIds).then(async valueJson => {
+        await tvShowSeasonDAO.findAllByTvShowIds(tvShowIds).then(async valueJson => {
             const idsDelete: string[] = []
             for (let v = 0; v < valueJson.length; v++) {
                 idsDelete.push(valueJson[v]._id)
             }
-            await MyTvShowController.deleteMyTvShowEpisodeAllByTvShowSeasonId(idsDelete)
-            await MyTvShowController.deleteMyTvShowSeasonAllByTvShowSeasonId(idsDelete)
-            await TvShowEpisodeController.deleteEpisodeAllByTvSeasonId(idsDelete)
+            await MyTvShowEpisodeController.deleteAllByTvShowSeasonIds(idsDelete)
+            await MyTvShowEpisodeNeverWatchController.deleteAllByTvShowSeasonIds(idsDelete)
+            await MyTvShowSeasonNeverWatchController.deleteAllByTvShowSeasonIds(idsDelete)
+            await TvShowEpisodeController.deleteAllByTvSeasonId(idsDelete)
             await tvShowSeasonDAO.deleteAllByIds(idsDelete)
         })
     }
 
-    public getAllByNotMyTvShow(req: Request, res: Response): Promise<string> {
+    public openAllByNotMyTvShow(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
@@ -38,8 +41,8 @@ class TvShowSeasonController {
                 const myTvShowSeasonNeverWatchDAO = new MyTvShowSeasonNeverWatchDAO()
                 const myTvShowEpisodeNeverWatchDAO = new MyTvShowEpisodeNeverWatchDAO()
                 const myTvShowEpisodeDAO = new MyTvShowEpisodeDAO()
-                tvShowSeasonDAO.getAllByTvShowIdAndStatus(req.body.tvShowId, true).then(async valuesJson => {
-                    let seasons = valuesJson.map(vj => TvShowSeasonGetObjectForJson(vj, req.userAuth))
+                tvShowSeasonDAO.findAllByTvShowIdAndStatus(req.params.tvShowId, true).then(async valuesJson => {
+                    let seasons = valuesJson.map(vj => GetTvShowSeasonByJson(vj, req.userAuth))
                     if (req.userAuth.level != "ADMIN") {
                         seasons = seasons.filter(season => season.reviewed || (season.user_register == req.userAuth._id))
                     }
@@ -48,19 +51,19 @@ class TvShowSeasonController {
                         let statusSeason = true
                         let countEpisode = 0
                         let countWatch = 0
-                        await tvShowEpisodeDAO.countByTvShowSeasonIdAndStatus(seasons[s]._id, true).then(countJson => {
+                        await tvShowEpisodeDAO.countAllByTvShowSeasonIdAndStatus(seasons[s]._id, true).then(countJson => {
                             countEpisode = countJson
                         })
-                        await myTvShowEpisodeDAO.countByTvShowSeasonIdAndUserId(seasons[s]._id, req.userAuth._id).then(countJson => {
+                        await myTvShowEpisodeDAO.countAllByTvShowSeasonIdAndUserId(seasons[s]._id, req.userAuth._id).then(countJson => {
                             countWatch += countJson
                         })
-                        await myTvShowEpisodeNeverWatchDAO.countByTvShowSeasonIdAndUserId(seasons[s]._id, req.userAuth._id).then(countJson => {
+                        await myTvShowEpisodeNeverWatchDAO.countAllByTvShowSeasonIdAndUserId(seasons[s]._id, req.userAuth._id).then(countJson => {
                             countWatch += countJson
                         })
                         if (countEpisode <= countWatch) {
                             statusSeason = false
                         }
-                        await myTvShowSeasonNeverWatchDAO.openByTvShowSeasonIdAndUserId(seasons[s]._id, req.userAuth._id).then(mtssnw => {
+                        await myTvShowSeasonNeverWatchDAO.findByTvShowSeasonIdAndUserId(seasons[s]._id, req.userAuth._id).then(mtssnw => {
                             if (mtssnw != null) {
                                 statusSeason = false
                             }
@@ -75,8 +78,8 @@ class TvShowSeasonController {
         })
     }
 
-    private static async deleteSeasonByIds(idsSeason: string[], tvShowSeasonDAO: TvShowSeasonDAO, tvShowEpisodeDAO: TvShowEpisodeDAO) {
-        await tvShowSeasonDAO.getAllByIds(idsSeason).then(async valueJson => {
+    private static async deleteLocalSeasonByIds(idsSeason: string[], tvShowSeasonDAO: TvShowSeasonDAO) {
+        await tvShowSeasonDAO.findAllByIds(idsSeason).then(async valueJson => {
             const idsDelete: string[] = []
             const idsUpdate: string[] = []
             for (let v = 0; v < valueJson.length; v++) {
@@ -86,23 +89,12 @@ class TvShowSeasonController {
                     idsUpdate.push(valueJson[v]._id)
                 }
             }
-            await MyTvShowController.deleteMyTvShowEpisodeAllByTvShowSeasonId(idsDelete)
-            await MyTvShowController.deleteMyTvShowSeasonAllByTvShowSeasonId(idsDelete)
-            await TvShowEpisodeController.deleteEpisodeAllByTvSeasonId(idsDelete)
+            await MyTvShowEpisodeController.deleteAllByTvShowSeasonIds(idsDelete)
+            await MyTvShowEpisodeNeverWatchController.deleteAllByTvShowSeasonIds(idsDelete)
+            await MyTvShowSeasonNeverWatchController.deleteAllByTvShowSeasonIds(idsDelete)
+            await TvShowEpisodeController.deleteAllByTvSeasonId(idsDelete)
             await tvShowSeasonDAO.deleteAllByIds(idsDelete)
             await tvShowSeasonDAO.updateByIds({ status: false, "updated_at": ConvertData.getDateNowStr() }, idsUpdate)
-        })
-    }
-
-    public deleteSeveralByIds(req: Request, res: Response): Promise<string> {
-        return new Promise(async (resolve, reject) => {
-            const errors = validationResult(req)
-            if (!errors.isEmpty()) {
-                DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
-            } else {
-                await TvShowSeasonController.deleteSeasonByIds(JSON.parse(req.body._ids), (new TvShowSeasonDAO()), (new TvShowEpisodeDAO()))
-                DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
-            }
         })
     }
 
@@ -110,9 +102,16 @@ class TvShowSeasonController {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
-                DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
+                DataReturnResponse.returnResolve(resolve,
+                    DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
-                await TvShowSeasonController.deleteSeasonByIds([req.body.tvShowSeasonId], (new TvShowSeasonDAO()), (new TvShowEpisodeDAO()))
+                let seasonIds: string[] = []
+                if (typeof req.route.methods.put != "undefined" && req.route.methods.put) {
+                    seasonIds = JSON.parse(req.body.tvShowSeasonId)
+                } else {
+                    seasonIds.push(req.params.tvShowSeasonId)
+                }
+                await TvShowSeasonController.deleteLocalSeasonByIds(seasonIds, (new TvShowSeasonDAO()))
                 DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
             }
         })
@@ -122,12 +121,14 @@ class TvShowSeasonController {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
-                DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
+                DataReturnResponse.returnResolve(resolve,
+                    DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const tvShowSeasonDAO = new TvShowSeasonDAO()
-                tvShowSeasonDAO.updateById({ reviewed: true, updated_at: ConvertData.getDateNowStr() }, req.body.tvShowSeasonId).then(async valueUpdate => {
-                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
-                }).catch(err => console.log(err))
+                tvShowSeasonDAO.updateById({ reviewed: true, updated_at: ConvertData.getDateNowStr() },
+                    req.params.tvShowSeasonId).then(async valueUpdate => {
+                        DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
+                    }).catch(err => console.log(err))
             }
         })
     }
@@ -136,12 +137,14 @@ class TvShowSeasonController {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
-                DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
+                DataReturnResponse.returnResolve(resolve,
+                    DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const tvShowSeasonDAO = new TvShowSeasonDAO()
-                tvShowSeasonDAO.updateById({ name: req.body.name, updated_at: ConvertData.getDateNowStr() }, req.body.tvShowSeasonId).then(valueUpdate => {
-                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
-                })
+                tvShowSeasonDAO.updateById({ name: req.body.name, updated_at: ConvertData.getDateNowStr() },
+                    req.params.tvShowSeasonId).then(valueUpdate => {
+                        DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res))
+                    })
             }
         })
     }
@@ -150,11 +153,12 @@ class TvShowSeasonController {
         return new Promise((resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
-                DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
+                DataReturnResponse.returnResolve(resolve,
+                    DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const tvShowSeasonDAO = new TvShowSeasonDAO()
-                tvShowSeasonDAO.openById(req.body.tvShowSeasonId).then(async valueJson => {
-                    const season = TvShowSeasonGetObjectForJson(valueJson!!, req.userAuth)
+                tvShowSeasonDAO.find(req.params.tvShowSeasonId).then(async valueJson => {
+                    const season = GetTvShowSeasonByJson(valueJson!!, req.userAuth)
                     DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, season))
                 }).catch(err => console.log(err))
             }
@@ -165,26 +169,29 @@ class TvShowSeasonController {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
-                DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
+                DataReturnResponse.returnResolve(resolve,
+                    DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const tvShowSeasonDAO = new TvShowSeasonDAO()
                 const reviewed = req.userAuth.level == "ADMIN"
-                tvShowSeasonDAO.create(req.body.name, req.body.tvShowId, req.userAuth._id, reviewed, ConvertData.getDateNowStr()).then(async valueId => {
-                    DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, valueId))
-                }).catch(err => console.log(err))
+                tvShowSeasonDAO.create(req.body.name, req.params.tvShowId, req.userAuth._id, reviewed,
+                    ConvertData.getDateNowStr()).then(async valueId => {
+                        DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseObjectJson(res, valueId))
+                    }).catch(err => console.log(err))
             }
         })
     }
 
-    public getAll(req: Request, res: Response): Promise<string> {
+    public openAll(req: Request, res: Response): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const errors = validationResult(req)
             if (!errors.isEmpty()) {
-                DataReturnResponse.returnResolve(resolve, DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
+                DataReturnResponse.returnResolve(resolve,
+                    DataJsonResponse.responseValidationFail(res, errors.array({ onlyFirstError: true })))
             } else {
                 const tvShowSeasonDAO = new TvShowSeasonDAO()
-                tvShowSeasonDAO.getAllByTvShowIdAndStatus(req.body.tvShowId, true).then(async valuesJson => {
-                    let seasons = valuesJson.map(vj => TvShowSeasonGetObjectForJson(vj, req.userAuth))
+                tvShowSeasonDAO.findAllByTvShowIdAndStatus(req.params.tvShowId, true).then(async valuesJson => {
+                    let seasons = valuesJson.map(vj => GetTvShowSeasonByJson(vj, req.userAuth))
                     if (req.userAuth.level != "ADMIN") {
                         seasons = seasons.filter(season => season.reviewed || (season.user_register == req.userAuth._id))
                     }

@@ -3,10 +3,10 @@ import Database from "../../app/config/Database"
 import User from "../../domain/entity/user/User"
 import UserRepository from "../../domain/repository/user/UserRepository"
 import CrudRepository from "../../domain/repository/CrudRepository"
-import { UserSetObjectDB, USER_NAME_OBJECT } from "../../domain/entity/user/UserConst"
+import { SetUserDB, USER_NAME_OBJECT } from "../../domain/entity/user/UserConst"
 
 export default class UserDAO implements UserRepository, CrudRepository<User> {
-    allByNotIdAndStatus(userIdValue: string, statusValue: boolean = true): Promise<User[]> {
+    findAllByNotIdAndStatus(userIdValue: string, statusValue: boolean = true): Promise<User[]> {
         return new Promise(async (resolve, reject) => {
             await Database.allByWhere(USER_NAME_OBJECT, { status: statusValue, _id: { $ne: new ObjectId(userIdValue) } }).then(value => {
                 if (value !== null) {
@@ -17,7 +17,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
-    openByCodeRecovery(codeRecoveryValue: string): Promise<User | null> {
+    findByCodeRecovery(codeRecoveryValue: string): Promise<User | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(USER_NAME_OBJECT, { code_recovery: codeRecoveryValue }).then(value => {
                 resolve(value != null ? Object.assign(new User(), value) : null)
@@ -26,7 +26,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
-    openByCellphoneAndPassword(cellphoneValue: string, passwordValue: string): Promise<User | null> {
+    findByCellphoneAndPassword(cellphoneValue: string, passwordValue: string): Promise<User | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(USER_NAME_OBJECT, { status: true, cellphone: cellphoneValue, password: passwordValue }).then(value => {
                 resolve(value != null ? Object.assign(new User(), value) : null)
@@ -35,7 +35,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
-    openByEmail(emailValue: string): Promise<User | null> {
+    findByEmail(emailValue: string): Promise<User | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(USER_NAME_OBJECT, { email: emailValue }).then(value => {
                 resolve(value != null ? Object.assign(new User(), value) : null)
@@ -44,7 +44,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
-    openByCellphone(cellphoneValue: string): Promise<User | null> {
+    findByCellphone(cellphoneValue: string): Promise<User | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(USER_NAME_OBJECT, { cellphone: cellphoneValue }).then(value => {
                 resolve(value != null ? Object.assign(new User(), value) : null)
@@ -61,7 +61,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
             reject(null)
         })
     }
-    
+
     updateByWhere(data: object, where: object): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
@@ -69,7 +69,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
     updateByIds(data: object, ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             const _ids = ids.map(i => new ObjectId(i))
-            await Database.updateByWhere(USER_NAME_OBJECT, data, { _id: { $in: _ids }}).then(value => {
+            await Database.updateByWhere(USER_NAME_OBJECT, data, { _id: { $in: _ids } }).then(value => {
                 resolve(true)
             })
             reject(false)
@@ -85,7 +85,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
-    openById(idOpen: string): Promise<User | null> {
+    find(idOpen: string): Promise<User | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(USER_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new User(), value) : null)
@@ -96,7 +96,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
 
     create(nameValue: string, birthValue: string, emailValue: string, cellphoneValue: string, passwordValue: string, levelValue: string, createdAtValue: string, lastAccessAtValue?: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = UserSetObjectDB(nameValue, birthValue, emailValue, cellphoneValue, passwordValue, levelValue, null, true, true, createdAtValue, lastAccessAtValue)
+            const objectDb = SetUserDB(nameValue, birthValue, emailValue, cellphoneValue, passwordValue, levelValue, null, true, true, createdAtValue, lastAccessAtValue)
             await Database.insert(USER_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })
@@ -104,7 +104,7 @@ export default class UserDAO implements UserRepository, CrudRepository<User> {
         })
     }
 
-    getAll(): Promise<User[]> {
+    findAll(): Promise<User[]> {
         return new Promise(async (resolve, reject) => {
             await Database.all(USER_NAME_OBJECT).then(valueJson => {
                 if (valueJson !== null) {

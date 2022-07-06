@@ -1,6 +1,7 @@
 import Category from "../../entity/category/Category"
 
 export default interface CategoryRepository {
-    openByName(nameValue: string): Promise<Category | null>
-    getAllByStatus(statusValue: boolean): Promise<Category[]>
+    findByName(nameValue: string): Promise<Category | null>
+    
+    findAllByStatus(statusValue: boolean): Promise<Category[]>
 }

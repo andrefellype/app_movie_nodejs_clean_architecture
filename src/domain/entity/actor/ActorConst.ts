@@ -2,7 +2,7 @@ import Actor from "./Actor"
 
 export const ACTOR_NAME_OBJECT = "actors"
 
-export function ActorSetObjectDB(nameValue: string, userRegister: object, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
+export function SetActorDB(nameValue: string, userRegister: object, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
     return {
         name: nameValue,
         user_register: userRegister,
@@ -13,7 +13,7 @@ export function ActorSetObjectDB(nameValue: string, userRegister: object, review
     }
 }
 
-export function ActorGetObjectForJson(actor: Actor, userId?: string) {
+export function GetActorByJson(actor: Actor, userId?: string) {
     return {
         _id: actor._id,
         name: actor.name,

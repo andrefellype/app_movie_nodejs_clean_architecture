@@ -2,9 +2,14 @@ import TvShow from "../../entity/tvShow/TvShow"
 
 export default interface TvShowRepository {
     deleteAllByIds(ids: string[]): Promise<boolean>
-    getAllByIds(ids: string[]): Promise<TvShow[]>
-    getAllByStreamsIds(streamsIdValue: string[]): Promise<TvShow[]>
-    getAllByCountriesIds(countriesIdValue: string[]): Promise<TvShow[]>
-    openByTitle(titleValue: string): Promise<TvShow | null>
-    getAllByStatus(statusValue: boolean): Promise<TvShow[]>
+
+    findAllByIds(ids: string[]): Promise<TvShow[]>
+
+    findAllByStreamsIds(streamsIdValue: string[]): Promise<TvShow[]>
+
+    findAllByCountriesIds(countriesIdValue: string[]): Promise<TvShow[]>
+
+    findByTitle(titleValue: string): Promise<TvShow | null>
+    
+    findAllByStatus(statusValue: boolean): Promise<TvShow[]>
 }

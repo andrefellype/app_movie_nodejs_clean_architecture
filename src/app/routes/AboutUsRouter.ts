@@ -9,20 +9,20 @@ class AboutUsRouter {
 
     public getRoutes(routes: Router) {
         this.routes = routes
-        this.open()
+        this.openLast()
         this.create()
-        this.update()
-        this.delete()
+        this.updateAll()
+        this.deleteAll()
     }
 
-    private delete() {
-        return this.routes.post('/aboutus/delete', this.verifyJWT, AboutUsController.delete)
+    private deleteAll() {
+        return this.routes.delete('/aboutus/delete', this.verifyJWT, AboutUsController.deleteAll)
     }
 
-    private update() {
-        return this.routes.post('/aboutus/update',
+    private updateAll() {
+        return this.routes.put('/aboutus/update',
             body('app').notEmpty().withMessage("App obrigatório."),
-            body('web').notEmpty().withMessage("Web obrigatório."), this.verifyJWT, AboutUsController.update)
+            body('web').notEmpty().withMessage("Web obrigatório."), this.verifyJWT, AboutUsController.updateAll)
     }
 
     private create() {
@@ -31,8 +31,8 @@ class AboutUsRouter {
             body('web').notEmpty().withMessage("Web obrigatório."), this.verifyJWT, AboutUsController.create)
     }
 
-    private open() {
-        return this.routes.get('/aboutus', AboutUsController.open)
+    private openLast() {
+        return this.routes.get('/aboutus', AboutUsController.openLast)
     }
 
     private verifyJWT(req, res, next) {

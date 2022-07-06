@@ -11,40 +11,40 @@ class TvShowRouter {
 
     public getRoutes(routes: Router) {
         this.routes = routes
-        this.getAll()
-        this.getTvShowDetailsAll()
+        this.openAll()
+        this.openTvShowDetailsAll()
         this.create()
         this.openById()
         this.updateById()
         this.updateApprovedById()
         this.deleteById()
-        this.deleteSeveralByIds()
-        this.getAllByNotMyTvShow()
+        this.deleteAllByIds()
+        this.openAllByNotMyTvShow()
     }
 
-    private getAllByNotMyTvShow() {
-        return this.routes.post('/tvshow/open/all/notmytvshow', this.verifyJWT, TvShowController.getAllByNotMyTvShow)
+    private openAllByNotMyTvShow() {
+        return this.routes.get('/tvshow/open/all/notmytvshow', this.verifyJWT, TvShowController.openAllByNotMyTvShow)
     }
 
-    private deleteSeveralByIds() {
-        return this.routes.post('/tvshow/delete/several', body('_ids').notEmpty(), this.verifyJWT, TvShowController.deleteSeveralByIds)
+    private deleteAllByIds() {
+        return this.routes.put('/tvshow/delete', body('tvShowId').notEmpty(), this.verifyJWT, TvShowController.deleteById)
     }
 
     private deleteById() {
-        return this.routes.post('/tvshow/delete', body('tvShowId').notEmpty(), this.verifyJWT, TvShowController.deleteById)
+        return this.routes.delete('/tvshow/delete/:tvShowId', this.verifyJWT, TvShowController.deleteById)
     }
 
     private updateApprovedById() {
-        return this.routes.post('/tvshow/approved/reviewed', body('tvShowId').notEmpty(), this.verifyJWT, TvShowController.updateApprovedById)
+        return this.routes.get('/tvshow/approved/:tvShowId', this.verifyJWT, TvShowController.updateApprovedById)
     }
 
     private updateById() {
         const tvShowDAO = new TvShowDAO()
-        return this.routes.post('/tvshow/update', body('tvShowId').notEmpty(), body('title').notEmpty().withMessage("Título obrigatório.")
-            .custom(async (value, { req }) => {
+        return this.routes.put('/tvshow/update/:tvShowId', body('title').notEmpty()
+            .withMessage("Título obrigatório.").custom(async (value, { req }) => {
                 return new Promise((resolve, reject) => {
-                    tvShowDAO.openByTitle(value).then((valueJson) => {
-                        if (valueJson != null && valueJson._id != req.body.tvShowId) {
+                    tvShowDAO.findByTitle(value).then((valueJson) => {
+                        if (valueJson != null && valueJson._id != req.params!!.tvShowId) {
                             DataReturnResponse.returnReject(reject, new Error('Título já existente.'))
                         } else {
                             DataReturnResponse.returnResolve(resolve, true)
@@ -55,11 +55,12 @@ class TvShowRouter {
                 }).catch(err => {
                     throw new Error(err.message)
                 })
-            }), body('release').notEmpty().withMessage("Lançamento obrigatório."), this.verifyJWT, TvShowController.updateById)
+            }), body('release').notEmpty().withMessage("Lançamento obrigatório."), this.verifyJWT,
+            TvShowController.updateById)
     }
 
     private openById() {
-        return this.routes.post('/tvshow/open', body('tvShowId').notEmpty(), this.verifyJWT, TvShowController.openById)
+        return this.routes.get('/tvshow/open/:tvShowId', this.verifyJWT, TvShowController.openById)
     }
 
     private create() {
@@ -67,7 +68,7 @@ class TvShowRouter {
         return this.routes.post('/tvshow/register', body('title').notEmpty().withMessage("Título obrigatório.")
             .custom(async (value) => {
                 return new Promise((resolve, reject) => {
-                    tvShowDAO.openByTitle(value).then((valueJson) => {
+                    tvShowDAO.findByTitle(value).then((valueJson) => {
                         if (valueJson != null) {
                             DataReturnResponse.returnReject(reject, new Error('Título já existente.'))
                         } else {
@@ -79,15 +80,17 @@ class TvShowRouter {
                 }).catch(err => {
                     throw new Error(err.message)
                 })
-            }), body('release').notEmpty().withMessage("Lançamento obrigatório."), this.verifyJWT, TvShowController.create)
+            }), body('release').notEmpty().withMessage("Lançamento obrigatório."), this.verifyJWT,
+            TvShowController.create)
     }
 
-    private getTvShowDetailsAll() {
-        return this.routes.post('/tvshow/open/details/all', body('tvShowIds').notEmpty(), this.verifyJWT, TvShowController.getTvShowDetailsAll)
+    private openTvShowDetailsAll() {
+        return this.routes.post('/tvshow/open/details/all', body('tvShowIds').notEmpty(),
+            this.verifyJWT, TvShowController.openTvShowDetailAll)
     }
 
-    private getAll() {
-        return this.routes.post('/tvshow/open/all', this.verifyJWT, TvShowController.getAll)
+    private openAll() {
+        return this.routes.get('/tvshow/open', this.verifyJWT, TvShowController.openAll)
     }
 
     private verifyJWT(req, res, next) {

@@ -2,7 +2,7 @@ import TvShow from "./TvShow"
 
 export const TV_SHOW_NAME_OBJECT = "tv_shows"
 
-export function TvShowSetObjectDB(
+export function SetTvShowDB(
     titleValue: string, releaseValue: string, resume: string, categoriesIdValue: string[], countriesIdValue: string[], streamsIdValue: string[],
     userRegister: object | null, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
     return {
@@ -20,7 +20,7 @@ export function TvShowSetObjectDB(
     }
 }
 
-export function TvShowGetObjectForJson(tvShow: TvShow, user?: any) {
+export function GetTvShowByJson(tvShow: TvShow, user?: any) {
     return {
         _id: tvShow._id,
         title: tvShow.title,

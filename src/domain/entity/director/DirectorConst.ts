@@ -2,7 +2,7 @@ import Director from "./Director"
 
 export const DIRECTOR_NAME_OBJECT = "directors"
 
-export function DirectorSetObjectDB(nameValue: string, userRegister: object, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
+export function SetDirectorDB(nameValue: string, userRegister: object, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
     return {
         name: nameValue,
         user_register: userRegister,
@@ -13,7 +13,7 @@ export function DirectorSetObjectDB(nameValue: string, userRegister: object, rev
     }
 }
 
-export function DirectorGetObjectForJson(director: Director, userId?: string) {
+export function GetDirectorByJson(director: Director, userId?: string) {
     return {
         _id: director._id,
         name: director.name,

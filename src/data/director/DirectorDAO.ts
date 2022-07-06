@@ -2,21 +2,21 @@ import { ObjectId } from "mongodb"
 import Database from "../../app/config/Database"
 import DirectorRepository from "../../domain/repository/director/DirectorRepository"
 import CrudRepository from "../../domain/repository/CrudRepository"
-import { DirectorSetObjectDB, DIRECTOR_NAME_OBJECT } from "../../domain/entity/director/DirectorConst"
+import { SetDirectorDB, DIRECTOR_NAME_OBJECT } from "../../domain/entity/director/DirectorConst"
 import Director from "../../domain/entity/director/Director"
 
 export default class DirectorDAO implements DirectorRepository, CrudRepository<Director> {
     deleteAllByIds(ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             const _ids = ids.map(i => new ObjectId(i))
-            await Database.deleteByWhere(DIRECTOR_NAME_OBJECT, { _id: { $in: _ids }}).then(value => {
+            await Database.deleteByWhere(DIRECTOR_NAME_OBJECT, { _id: { $in: _ids } }).then(value => {
                 resolve(true)
             })
             reject(null)
         })
     }
 
-    getAllByIds(ids: string[]): Promise<Director[]> {
+    findAllByIds(ids: string[]): Promise<Director[]> {
         return new Promise(async (resolve, reject) => {
             const _ids = ids.map(i => new ObjectId(i))
             await Database.allByWhere(DIRECTOR_NAME_OBJECT, { _id: { $in: _ids } }).then(valueJson => {
@@ -28,7 +28,7 @@ export default class DirectorDAO implements DirectorRepository, CrudRepository<D
         })
     }
 
-    openByName(nameValue: string): Promise<Director | null> {
+    findByName(nameValue: string): Promise<Director | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(DIRECTOR_NAME_OBJECT, { name: nameValue }).then(value => {
                 resolve(value != null ? Object.assign(new Director(), value) : null)
@@ -37,7 +37,7 @@ export default class DirectorDAO implements DirectorRepository, CrudRepository<D
         })
     }
 
-    getAllByStatus(statusValue: boolean): Promise<Director[]> {
+    findAllByStatus(statusValue: boolean): Promise<Director[]> {
         return new Promise(async (resolve, reject) => {
             await Database.allByWhere(DIRECTOR_NAME_OBJECT, { status: statusValue }).then(valueJson => {
                 if (valueJson !== null) {
@@ -56,7 +56,7 @@ export default class DirectorDAO implements DirectorRepository, CrudRepository<D
             reject(null)
         })
     }
-    
+
     updateByWhere(data: object, where: object): Promise<boolean> {
         throw new Error("Method not implemented.")
     }
@@ -64,7 +64,7 @@ export default class DirectorDAO implements DirectorRepository, CrudRepository<D
     updateByIds(data: object, ids: string[]): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             const _ids = ids.map(i => new ObjectId(i))
-            await Database.updateByWhere(DIRECTOR_NAME_OBJECT, data, { _id: { $in: _ids }}).then(value => {
+            await Database.updateByWhere(DIRECTOR_NAME_OBJECT, data, { _id: { $in: _ids } }).then(value => {
                 resolve(true)
             })
             reject(false)
@@ -80,7 +80,7 @@ export default class DirectorDAO implements DirectorRepository, CrudRepository<D
         })
     }
 
-    openById(idOpen: string): Promise<Director | null> {
+    find(idOpen: string): Promise<Director | null> {
         return new Promise(async (resolve, reject) => {
             await Database.openByWhere(DIRECTOR_NAME_OBJECT, { _id: new ObjectId(idOpen) }).then(value => {
                 resolve(value != null ? Object.assign(new Director(), value) : null)
@@ -91,7 +91,7 @@ export default class DirectorDAO implements DirectorRepository, CrudRepository<D
 
     create(nameValue: string, userRegister: string, reviewedValue: boolean, createdAtValue: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const objectDb = DirectorSetObjectDB(nameValue, (new ObjectId(userRegister)), reviewedValue, true, createdAtValue)
+            const objectDb = SetDirectorDB(nameValue, (new ObjectId(userRegister)), reviewedValue, true, createdAtValue)
             await Database.insert(DIRECTOR_NAME_OBJECT, objectDb).then(valueJson => {
                 resolve(valueJson as string)
             })
@@ -99,7 +99,7 @@ export default class DirectorDAO implements DirectorRepository, CrudRepository<D
         })
     }
 
-    getAll(): Promise<Director[]> {
+    findAll(): Promise<Director[]> {
         throw new Error("Method not implemented.")
     }
 }

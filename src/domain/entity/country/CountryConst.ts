@@ -2,7 +2,7 @@ import Country from "./Country"
 
 export const COUNTRY_NAME_OBJECT = "countries"
 
-export function CountrySetObjectDB(initialValue: string, userRegister: object, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
+export function SetCountryDB(initialValue: string, userRegister: object, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
     return {
         initial: initialValue,
         user_register: userRegister,
@@ -13,7 +13,7 @@ export function CountrySetObjectDB(initialValue: string, userRegister: object, r
     }
 }
 
-export function CountryGetObjectForJson(country: Country, userId?: string) {
+export function GetCountryByJson(country: Country, userId?: string) {
     return {
         _id: country._id,
         initial: country.initial,

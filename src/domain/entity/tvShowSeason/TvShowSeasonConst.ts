@@ -2,7 +2,7 @@ import TvShowSeason from "./TvShowSeason"
 
 export const TV_SHOW_SEASON_NAME_OBJECT = "tv_show_seasons"
 
-export function TvShowSeasonSetObjectDB(nameValue: string, tvShowId: object, userRegister: object | null, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
+export function SetTvShowSeasonDB(nameValue: string, tvShowId: object, userRegister: object | null, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
     return {
         name: nameValue,
         tv_show_id: tvShowId,
@@ -14,7 +14,7 @@ export function TvShowSeasonSetObjectDB(nameValue: string, tvShowId: object, use
     }
 }
 
-export function TvShowSeasonGetObjectForJson(season: TvShowSeason, user?: any) {
+export function GetTvShowSeasonByJson(season: TvShowSeason, user?: any) {
     return {
         _id: season._id,
         name: season.name,

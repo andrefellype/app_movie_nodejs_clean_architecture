@@ -11,40 +11,41 @@ class TvShowEpisodeRouter {
 
     public getRoutes(routes: Router) {
         this.routes = routes
-        this.getAll()
+        this.openAll()
         this.create()
         this.openById()
         this.updateById()
         this.updateApprovedById()
         this.deleteById()
-        this.deleteSeveralByIds()
-        this.getAllByNotMyTvShow()
+        this.deleteAllByIds()
+        this.openAllByNotMyTvShow()
     }
 
-    private getAllByNotMyTvShow() {
-        return this.routes.post('/tvshowepisode/open/all/notmytvshow', body('tvShowSeasonId').notEmpty().withMessage("Temporada obrigatória."), this.verifyJWT, TvShowEpisodeController.getAllByNotMyTvShow)
+    private openAllByNotMyTvShow() {
+        return this.routes.get('/tvshowepisode/open/notmytvshow/:tvShowSeasonId', this.verifyJWT, TvShowEpisodeController.openAllByNotMyTvShow)
     }
 
-    private deleteSeveralByIds() {
-        return this.routes.post('/tvshowepisode/delete/several', body('_ids').notEmpty(), this.verifyJWT, TvShowEpisodeController.deleteSeveralByIds)
+    private deleteAllByIds() {
+        return this.routes.put('/tvshowepisode/delete', body('tvShowEpisodeId').notEmpty(), this.verifyJWT, TvShowEpisodeController.deleteById)
     }
 
     private deleteById() {
-        return this.routes.post('/tvshowepisode/delete', body('tvShowEpisodeId').notEmpty(), this.verifyJWT, TvShowEpisodeController.deleteById)
+        return this.routes.delete('/tvshowepisode/delete/:tvShowEpisodeId', this.verifyJWT, TvShowEpisodeController.deleteById)
     }
 
     private updateApprovedById() {
-        return this.routes.post('/tvshowepisode/approved/reviewed', body('tvShowEpisodeId').notEmpty(), this.verifyJWT, TvShowEpisodeController.updateApprovedById)
+        return this.routes.get('/tvshowepisode/approved/:tvShowEpisodeId', this.verifyJWT, TvShowEpisodeController.updateApprovedById)
     }
 
     private updateById() {
         const tvShowEpisodeDAO = new TvShowEpisodeDAO()
-        return this.routes.post('/tvshowepisode/update', body('tvShowEpisodeId').notEmpty(), body('tvShowSeasonId').notEmpty(),
+        return this.routes.put('/tvshowepisode/update/:tvShowEpisodeId/:tvShowSeasonId',
             body('name').notEmpty().withMessage("Nome obrigatório.").custom(async (value, { req }) => {
                 return new Promise((resolve, reject) => {
-                    if (req.body.tvShowSeasonId != null && req.body.tvShowSeasonId.length > 0 && req.body.tvShowEpisodeId != null && req.body.tvShowEpisodeId.length > 0) {
-                        tvShowEpisodeDAO.openByNameAndTvShowSeasonId(req.body.name, req.body.tvShowSeasonId).then((valueJson) => {
-                            if (valueJson != null && valueJson._id != req.body.tvShowEpisodeId) {
+                    if (req.params!!.tvShowSeasonId != null && req.params!!.tvShowSeasonId.length > 0
+                        && req.params!!.tvShowEpisodeId != null && req.params!!.tvShowEpisodeId.length > 0) {
+                        tvShowEpisodeDAO.findByNameAndTvShowSeasonId(req.body.name, req.params!!.tvShowSeasonId).then((valueJson) => {
+                            if (valueJson != null && valueJson._id != req.params!!.tvShowEpisodeId) {
                                 DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
                             } else {
                                 DataReturnResponse.returnResolve(resolve, true)
@@ -62,34 +63,35 @@ class TvShowEpisodeRouter {
     }
 
     private openById() {
-        return this.routes.post('/tvshowepisode/open', body('tvShowEpisodeId').notEmpty(), this.verifyJWT, TvShowEpisodeController.openById)
+        return this.routes.get('/tvshowepisode/open/:tvShowEpisodeId', this.verifyJWT, TvShowEpisodeController.openById)
     }
 
     private create() {
         const tvShowEpisodeDAO = new TvShowEpisodeDAO()
-        return this.routes.post('/tvshowepisode/register', body('tvShowSeasonId').notEmpty(), body('name').notEmpty().withMessage("Nome obrigatório.").custom(async (value, { req }) => {
-            return new Promise((resolve, reject) => {
-                if (req.body.tvShowSeasonId.length > 0) {
-                    tvShowEpisodeDAO.openByNameAndTvShowSeasonId(req.body.name, req.body.tvShowSeasonId).then((valueJson) => {
-                        if (valueJson != null) {
-                            DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
-                        } else {
-                            DataReturnResponse.returnResolve(resolve, true)
-                        }
-                    }).catch(err => {
-                        DataReturnResponse.returnReject(reject, new Error(err.message))
-                    })
-                } else {
-                    DataReturnResponse.returnResolve(resolve, true)
-                }
-            }).catch(err => {
-                throw new Error(err.message)
-            })
-        }), this.verifyJWT, TvShowEpisodeController.create)
+        return this.routes.post('/tvshowepisode/register/:tvShowSeasonId', body('name').notEmpty().withMessage("Nome obrigatório.")
+            .custom(async (value, { req }) => {
+                return new Promise((resolve, reject) => {
+                    if (req.params!!.tvShowSeasonId.length > 0) {
+                        tvShowEpisodeDAO.findByNameAndTvShowSeasonId(req.body.name, req.params!!.tvShowSeasonId).then((valueJson) => {
+                            if (valueJson != null) {
+                                DataReturnResponse.returnReject(reject, new Error('Nome já existente.'))
+                            } else {
+                                DataReturnResponse.returnResolve(resolve, true)
+                            }
+                        }).catch(err => {
+                            DataReturnResponse.returnReject(reject, new Error(err.message))
+                        })
+                    } else {
+                        DataReturnResponse.returnResolve(resolve, true)
+                    }
+                }).catch(err => {
+                    throw new Error(err.message)
+                })
+            }), this.verifyJWT, TvShowEpisodeController.create)
     }
 
-    private getAll() {
-        return this.routes.post('/tvshowepisode/open/all', body('tvShowSeasonId').notEmpty().withMessage("Temporada obrigatória."), this.verifyJWT, TvShowEpisodeController.getAll)
+    private openAll() {
+        return this.routes.get('/tvshowepisode/open/all/:tvShowSeasonId', this.verifyJWT, TvShowEpisodeController.openAll)
     }
 
     private verifyJWT(req, res, next) {

@@ -2,7 +2,7 @@ import Stream from "./Stream"
 
 export const STREAM_NAME_OBJECT = "streams"
 
-export function StreamSetObjectDB(nameValue: string, userRegister: object, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
+export function SetStreamDB(nameValue: string, userRegister: object, reviewedValue: boolean, statusValue: boolean, createdAtValue: string) {
     return {
         name: nameValue,
         user_register: userRegister,
@@ -13,7 +13,7 @@ export function StreamSetObjectDB(nameValue: string, userRegister: object, revie
     }
 }
 
-export function StreamGetObjectForJson(stream: Stream, userId?: string) {
+export function GetStreamByJson(stream: Stream, userId?: string) {
     return {
         _id: stream._id,
         name: stream.name,

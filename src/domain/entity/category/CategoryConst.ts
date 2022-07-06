@@ -2,7 +2,7 @@ import Category from "./Category"
 
 export const CATEGORY_NAME_OBJECT = "categories"
 
-export function CategorySetObjectDB(nameValue: string, statusValue: boolean, createdAtValue: string) {
+export function SetCategoryDB(nameValue: string, statusValue: boolean, createdAtValue: string) {
     return {
         name: nameValue,
         status: statusValue,
@@ -11,7 +11,7 @@ export function CategorySetObjectDB(nameValue: string, statusValue: boolean, cre
     }
 }
 
-export function CategoryGetObjectForJson(category: Category) {
+export function GetCategoryByJson(category: Category) {
     return {
         _id: category._id,
         name: category.name,

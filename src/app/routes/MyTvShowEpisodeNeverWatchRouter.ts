@@ -1,28 +1,19 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
+import MyTvShowEpisodeNeverWatchController from '../../usercases/MyTvShowEpisodeNeverWatchController'
 import DataJsonResponse from '../core/DataJsonResponse'
-import MyMovieController from '../../usercases/MyMovieController'
 
-class MyMovieRouter {
+class MyTvShowEpisodeNeverWatchRouter {
     private routes: Router
 
     public getRoutes(routes: Router) {
         this.routes = routes
-        this.openAll()
         this.create()
-        this.deleteById()
-    }
-
-    private deleteById() {
-        return this.routes.delete('/mymovie/delete/:movieId', this.verifyJWT, MyMovieController.deleteById)
     }
 
     private create() {
-        return this.routes.get('/mymovie/register/:movieId', this.verifyJWT, MyMovieController.create)
-    }
-
-    private openAll() {
-        return this.routes.get('/mymovie/open', this.verifyJWT, MyMovieController.openAll)
+        return this.routes.get('/mytvshowepisodeneverwatch/register/:tvShowId/:tvShowSeasonId/:tvShowEpisodeId',
+            this.verifyJWT, MyTvShowEpisodeNeverWatchController.create)
     }
 
     private verifyJWT(req, res, next) {
@@ -35,4 +26,4 @@ class MyMovieRouter {
     }
 }
 
-export default new MyMovieRouter()
+export default new MyTvShowEpisodeNeverWatchRouter()

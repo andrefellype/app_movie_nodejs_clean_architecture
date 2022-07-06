@@ -1,6 +1,6 @@
 export const ABOUT_US_NAME_OBJECT = "about_us"
 
-export function AboutUsSetObjectDB(app: string, web: string, createdAt: string) {
+export function SetAboutUsDB(app: string, web: string, createdAt: string) {
     return {
         app: app,
         web: web,
